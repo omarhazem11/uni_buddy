@@ -43,6 +43,24 @@ const _durations = [
   Duration(milliseconds: 3100),
 ];
 
+const _pulseDurations = [
+  Duration(milliseconds: 1800),
+  Duration(milliseconds: 2200),
+  Duration(milliseconds: 1500),
+  Duration(milliseconds: 2500),
+  Duration(milliseconds: 1650),
+  Duration(milliseconds: 2350),
+];
+
+const _pulseDelays = [
+  Duration.zero,
+  Duration(milliseconds: 300),
+  Duration(milliseconds: 600),
+  Duration(milliseconds: 150),
+  Duration(milliseconds: 900),
+  Duration(milliseconds: 450),
+];
+
 class UniCardGrid extends StatelessWidget {
   const UniCardGrid({super.key});
 
@@ -58,6 +76,8 @@ class UniCardGrid extends StatelessWidget {
                   data: previewUniversities[row * 2],
                   delay: _delays[row * 2],
                   duration: _durations[row * 2],
+                  pulseDuration: _pulseDurations[row * 2],
+                  pulseDelay: _pulseDelays[row * 2],
                 ),
               ),
               const SizedBox(width: 12),
@@ -66,6 +86,8 @@ class UniCardGrid extends StatelessWidget {
                   data: previewUniversities[row * 2 + 1],
                   delay: _delays[row * 2 + 1],
                   duration: _durations[row * 2 + 1],
+                  pulseDuration: _pulseDurations[row * 2 + 1],
+                  pulseDelay: _pulseDelays[row * 2 + 1],
                 ),
               ),
             ],
@@ -81,12 +103,16 @@ class AnimatedUniCard extends StatefulWidget {
   final UniCardData data;
   final Duration duration;
   final Duration delay;
+  final Duration pulseDuration;
+  final Duration pulseDelay;
 
   const AnimatedUniCard({
     super.key,
     required this.data,
     required this.duration,
     required this.delay,
+    required this.pulseDuration,
+    required this.pulseDelay,
   });
 
   @override
@@ -94,35 +120,53 @@ class AnimatedUniCard extends StatefulWidget {
 }
 
 class _AnimatedUniCardState extends State<AnimatedUniCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+    with TickerProviderStateMixin {
+  late AnimationController _floatController;
   late Animation<double> _floatAnim;
+
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnim;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration);
+
+    _floatController =
+        AnimationController(vsync: this, duration: widget.duration);
     _floatAnim = Tween<double>(begin: 0, end: -8).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
     );
     Future.delayed(widget.delay, () {
-      if (mounted) _controller.repeat(reverse: true);
+      if (mounted) _floatController.repeat(reverse: true);
+    });
+
+    _pulseController =
+        AnimationController(vsync: this, duration: widget.pulseDuration);
+    _pulseAnim = Tween<double>(begin: 0.2, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+    Future.delayed(widget.pulseDelay, () {
+      if (mounted) _pulseController.repeat(reverse: true);
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _floatController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) => Transform.translate(
-        offset: Offset(0, _floatAnim.value),
-        child: child,
+      animation: Listenable.merge([_floatController, _pulseController]),
+      builder: (context, child) => Opacity(
+        opacity: _pulseAnim.value,
+        child: Transform.translate(
+          offset: Offset(0, _floatAnim.value),
+          child: child,
+        ),
       ),
       child: Container(
         height: 62,
