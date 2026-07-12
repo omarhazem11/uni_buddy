@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../achievements/presentation/providers/achievements_provider.dart';
+import '../../../achievements/presentation/utils/celebrate_badges.dart';
 import '../../../planner/presentation/pages/planner_page.dart';
 
-class DashboardBottomNav extends StatelessWidget {
+class DashboardBottomNav extends ConsumerWidget {
   const DashboardBottomNav({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 12, 8, 22),
       decoration: const BoxDecoration(
@@ -21,15 +24,31 @@ class DashboardBottomNav extends StatelessWidget {
           _NavItem(
             icon: Icons.calendar_month_rounded,
             label: 'Planner',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const PlannerPage()),
-            ),
+            onTap: () async {
+              await _recordVisit(ref, context, 'planner');
+              if (context.mounted) {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PlannerPage()));
+              }
+            },
           ),
-          const _NavItem(icon: Icons.description_outlined, label: 'Notes'),
-          const _NavItem(icon: Icons.bar_chart_rounded, label: 'Analytics'),
+          _NavItem(
+            icon: Icons.description_outlined,
+            label: 'Notes',
+            onTap: () => _recordVisit(ref, context, 'notes'),
+          ),
+          _NavItem(
+            icon: Icons.bar_chart_rounded,
+            label: 'Analytics',
+            onTap: () => _recordVisit(ref, context, 'analytics'),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _recordVisit(WidgetRef ref, BuildContext context, String tabName) async {
+    await ref.read(achievementsActionsProvider.notifier).recordTabVisit(tabName);
+    if (context.mounted) await recalculateAndCelebrate(context, ref);
   }
 }
 

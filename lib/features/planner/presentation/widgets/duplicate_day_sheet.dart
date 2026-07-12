@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../achievements/presentation/providers/achievements_provider.dart';
+import '../../../achievements/presentation/utils/celebrate_badges.dart';
 import '../providers/planner_provider.dart';
 import '../utils/schedule_date_format.dart';
 import 'duplicate_day_confirm_button.dart';
@@ -97,29 +99,40 @@ class _DuplicateDaySheetState extends ConsumerState<DuplicateDaySheet> {
 
   Future<void> _confirm() async {
     if (_selected.isEmpty) return;
-    final messenger = ScaffoldMessenger.of(context);
     final count = _selected.length;
 
     final success = await ref
         .read(plannerActionsProvider.notifier)
         .duplicateItemsToDate(widget.sourceDate, _selected.toList());
+    if (!success || !mounted) return;
 
-    if (success && mounted) {
-      Navigator.pop(context);
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            'Schedule copied to $count day${count == 1 ? '' : 's'}! 🎉',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
-          ),
-          backgroundColor: AppColors.mint,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-          margin: const EdgeInsets.symmetric(horizontal: 70, vertical: 24),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    // Record + recalculate before popping (context/ref stay valid), but
+    // queue the copy-success toast first and any badge celebration after —
+    // the confirmation the student is expecting should appear immediately,
+    // not wait behind a badge toast's duration.
+    await ref.read(achievementsActionsProvider.notifier).recordDuplicateDayUsed();
+    if (!mounted) return;
+    final newlyUnlocked = await ref.read(achievementsActionsProvider.notifier).recalculateBadges();
+    if (!mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.pop(context);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          'Schedule copied to $count day${count == 1 ? '' : 's'}! 🎉',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
         ),
-      );
+        backgroundColor: AppColors.mint,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+        margin: const EdgeInsets.symmetric(horizontal: 70, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      ),
+    );
+    for (final badge in newlyUnlocked) {
+      messenger.showSnackBar(badgeUnlockSnackBar(badge));
     }
   }
 }

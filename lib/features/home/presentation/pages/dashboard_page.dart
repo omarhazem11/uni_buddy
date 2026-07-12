@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../achievements/domain/badge_ids.dart';
+import '../../../achievements/presentation/providers/achievements_provider.dart';
+import '../../../achievements/presentation/utils/celebrate_badges.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../planner/presentation/providers/planner_provider.dart';
 import '../../../tasks/presentation/pages/tasks_page.dart';
@@ -12,11 +15,30 @@ import '../widgets/dashboard_hero_card.dart';
 import '../widgets/dashboard_tile_grid.dart';
 import '../widgets/dashboard_top_nav.dart';
 
-class DashboardPage extends ConsumerWidget {
+class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends ConsumerState<DashboardPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Once per dashboard mount is a reasonable proxy for "once per session
+    // start" — the datasource's same-day check keeps repeat mounts a no-op
+    // for streak purposes regardless.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final notifier = ref.read(achievementsActionsProvider.notifier);
+      await notifier.recordAppOpen();
+      await notifier.recordTabVisit('home');
+      if (mounted) await recalculateAndCelebrate(context, ref);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).value;
     final firstName = (user?.displayName?.trim().isNotEmpty ?? false)
         ? user!.displayName!.trim().split(' ').first
@@ -29,12 +51,23 @@ class DashboardPage extends ConsumerWidget {
         : "You're all caught up! 🎉";
 
     final hasScheduleItems = ref.watch(hasAnyScheduleItemsProvider).value ?? false;
-    final stepsDone = 1 + (tasks.isNotEmpty ? 1 : 0) + (hasScheduleItems ? 1 : 0);
+    // Excludes "Getting Started" — it unlocks the instant any tab is
+    // visited (including the automatic 'home' visit on mount), so
+    // counting it here would make step 4 trivially done from first load
+    // instead of reflecting a genuine accomplishment.
+    final hasBadge = ref.watch(badgesProvider).value?.any(
+              (b) => b.isUnlocked && b.id != BadgeIds.gettingStarted,
+            ) ??
+        false;
+    final stepsDone =
+        1 + (tasks.isNotEmpty ? 1 : 0) + (hasScheduleItems ? 1 : 0) + (hasBadge ? 1 : 0);
     final nextStepLabel = tasks.isEmpty
         ? 'add a task next'
         : !hasScheduleItems
             ? 'plan your week next'
-            : 'earn your first badge next';
+            : !hasBadge
+                ? 'earn your first badge next'
+                : "you're all set! 🎉";
 
     return Scaffold(
       backgroundColor: AppColors.bg,

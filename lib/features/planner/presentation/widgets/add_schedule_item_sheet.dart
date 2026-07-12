@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../achievements/presentation/providers/achievements_provider.dart';
+import '../../../achievements/presentation/utils/celebrate_badges.dart';
 import '../../domain/entities/schedule_item_entity.dart';
 import '../providers/planner_provider.dart';
 import '../utils/schedule_color.dart';
@@ -127,7 +129,13 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
       colorHex: _colorHex,
       emoji: _emoji,
     );
+    if (!success || !mounted) return;
 
-    if (success && mounted) Navigator.pop(context);
+    if (!_isEditing) {
+      await ref.read(achievementsActionsProvider.notifier).recordPlannerItemAdded(itemDate: _date);
+      if (mounted) await recalculateAndCelebrate(context, ref);
+    }
+
+    if (mounted) Navigator.pop(context);
   }
 }

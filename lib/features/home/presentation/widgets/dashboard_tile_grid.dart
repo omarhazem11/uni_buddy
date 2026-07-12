@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../achievements/presentation/pages/achievements_page.dart';
+import '../../../achievements/presentation/providers/achievements_provider.dart';
 import '../../../planner/presentation/pages/planner_page.dart';
 import '../../../planner/presentation/providers/planner_provider.dart';
 import '../../../tasks/domain/entities/task_entity.dart';
@@ -18,6 +20,10 @@ class DashboardTileGrid extends ConsumerWidget {
     final tasksSubtitle = _tasksSubtitle(tasks);
     final todayItemCount = ref.watch(dayItemsProvider(dateOnly(DateTime.now()))).value?.length ?? 0;
     final plannerSubtitle = todayItemCount > 0 ? '$todayItemCount scheduled today' : 'Plan your week 📅';
+    final unlockedBadgeCount =
+        ref.watch(badgesProvider).value?.where((b) => b.isUnlocked).length ?? 0;
+    final badgesSubtitle =
+        unlockedBadgeCount > 0 ? '$unlockedBadgeCount badges earned' : 'Earn your first badge 🏆';
 
     return Column(
       children: [
@@ -72,11 +78,11 @@ class DashboardTileGrid extends ConsumerWidget {
                 child: DashboardTile(
                   icon: Icons.emoji_events_outlined,
                   title: 'Badges',
-                  subtitle: 'Earn first badge 🏆',
+                  subtitle: badgesSubtitle,
                   background: AppColors.tileAmberBg,
                   iconBackground: AppColors.tileAmberIcon,
                   accent: AppColors.tileAmberText,
-                  onTap: () {},
+                  onTap: () => _openAchievements(context),
                 ),
               ),
             ],
@@ -103,5 +109,9 @@ class DashboardTileGrid extends ConsumerWidget {
 
   void _openPlanner(BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PlannerPage()));
+  }
+
+  void _openAchievements(BuildContext context) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AchievementsPage()));
   }
 }

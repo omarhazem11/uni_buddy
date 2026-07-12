@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:uni_verse/core/errors/failures.dart';
+import 'package:uni_verse/features/achievements/presentation/providers/achievements_provider.dart';
 import 'package:uni_verse/features/tasks/domain/entities/task_entity.dart';
 import 'package:uni_verse/features/tasks/domain/repositories/task_repository.dart';
 import 'package:uni_verse/features/tasks/presentation/pages/task_detail_page.dart';
@@ -14,6 +15,7 @@ import 'package:uni_verse/features/tasks/presentation/utils/task_date_format.dar
 import 'package:uni_verse/features/tasks/presentation/widgets/task_checkbox.dart';
 import 'package:uni_verse/features/tasks/presentation/widgets/task_reminder_section.dart';
 import 'package:uni_verse/features/tasks/presentation/widgets/task_save_button.dart';
+import 'fakes/fake_achievements_datasource.dart';
 
 class FakeTaskRepository implements TaskRepository {
   final _tasks = <TaskEntity>[];
@@ -67,7 +69,10 @@ Future<FakeTaskRepository> _pumpTasksPage(WidgetTester tester) async {
   final fake = FakeTaskRepository();
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [taskRepositoryProvider.overrideWithValue(fake)],
+      overrides: [
+        taskRepositoryProvider.overrideWithValue(fake),
+        achievementsRemoteDataSourceProvider.overrideWithValue(FakeAchievementsDataSource()),
+      ],
       child: const MaterialApp(home: TasksPage()),
     ),
   );

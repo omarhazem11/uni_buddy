@@ -27,3 +27,7 @@ class TaskFailure extends Failure {
 class PlannerFailure extends Failure {
   const PlannerFailure(super.message);
 }
+
+class AchievementsFailure extends Failure {
+  const AchievementsFailure(super.message);
+}

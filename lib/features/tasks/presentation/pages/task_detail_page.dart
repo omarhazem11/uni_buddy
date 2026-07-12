@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/task_entity.dart';
 import '../providers/task_provider.dart';
+import '../utils/task_completion_celebration.dart';
 import '../widgets/add_task_sheet.dart';
 import '../widgets/task_delete_dialog.dart';
 import '../widgets/task_detail_description_card.dart';
@@ -81,7 +82,7 @@ class TaskDetailPage extends ConsumerWidget {
 
   Future<void> _toggle(BuildContext context, WidgetRef ref, TaskEntity task) async {
     final markingComplete = !task.isCompleted;
-    await ref.read(taskActionsProvider.notifier).toggleComplete(task.id, markingComplete);
+    await toggleTaskCompletionAndCelebrate(context, ref, task, markingComplete);
     if (markingComplete && context.mounted) Navigator.pop(context);
   }
 

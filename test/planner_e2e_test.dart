@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:uni_verse/core/errors/failures.dart';
 import 'package:uni_verse/core/theme/app_colors.dart';
+import 'package:uni_verse/features/achievements/presentation/providers/achievements_provider.dart';
 import 'package:uni_verse/features/planner/domain/entities/planner_settings_entity.dart';
 import 'package:uni_verse/features/planner/domain/entities/schedule_item_entity.dart';
 import 'package:uni_verse/features/planner/domain/repositories/planner_repository.dart';
@@ -18,6 +19,7 @@ import 'package:uni_verse/features/planner/presentation/widgets/task_timeline_bl
 import 'package:uni_verse/features/tasks/domain/entities/task_entity.dart';
 import 'package:uni_verse/features/tasks/presentation/pages/task_detail_page.dart';
 import 'package:uni_verse/features/tasks/presentation/providers/task_provider.dart';
+import 'fakes/fake_achievements_datasource.dart';
 
 class FakePlannerRepository implements PlannerRepository {
   final items = <ScheduleItemEntity>[];
@@ -118,6 +120,7 @@ Future<FakePlannerRepository> _pumpPlannerPage(WidgetTester tester, {List<TaskEn
       overrides: [
         plannerRepositoryProvider.overrideWithValue(fake),
         tasksStreamProvider.overrideWith((ref) => Stream.value(tasks ?? <TaskEntity>[])),
+        achievementsRemoteDataSourceProvider.overrideWithValue(FakeAchievementsDataSource()),
       ],
       child: const MaterialApp(home: PlannerPage()),
     ),

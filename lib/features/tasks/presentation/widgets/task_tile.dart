@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/task_entity.dart';
 import '../pages/task_detail_page.dart';
 import '../providers/task_provider.dart';
+import '../utils/task_completion_celebration.dart';
 import 'task_checkbox.dart';
 import 'task_delete_dialog.dart';
 import 'task_metadata_row.dart';
@@ -42,9 +43,8 @@ class TaskTile extends ConsumerWidget {
                     padding: const EdgeInsets.only(top: 2),
                     child: TaskCheckbox(
                       isCompleted: task.isCompleted,
-                      onTap: () => ref
-                          .read(taskActionsProvider.notifier)
-                          .toggleComplete(task.id, !task.isCompleted),
+                      onTap: () =>
+                          toggleTaskCompletionAndCelebrate(context, ref, task, !task.isCompleted),
                     ),
                   ),
                   const SizedBox(width: 12),

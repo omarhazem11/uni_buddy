@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:uni_verse/core/errors/failures.dart';
+import 'package:uni_verse/features/achievements/data/models/user_progress_model.dart';
+import 'package:uni_verse/features/achievements/domain/entities/user_progress_entity.dart';
+import 'package:uni_verse/features/achievements/presentation/providers/achievements_provider.dart';
 import 'package:uni_verse/features/auth/domain/entities/user_entity.dart';
 import 'package:uni_verse/features/auth/presentation/providers/auth_provider.dart';
 import 'package:uni_verse/features/home/presentation/pages/dashboard_page.dart';
@@ -12,6 +15,7 @@ import 'package:uni_verse/features/planner/domain/repositories/planner_repositor
 import 'package:uni_verse/features/planner/presentation/providers/planner_provider.dart';
 import 'package:uni_verse/features/tasks/domain/entities/task_entity.dart';
 import 'package:uni_verse/features/tasks/presentation/providers/task_provider.dart';
+import 'fakes/fake_achievements_datasource.dart';
 
 /// A minimal stand-in for PlannerRepository — every method that isn't
 /// exercised by DashboardPage/DashboardTileGrid just needs to not touch
@@ -70,11 +74,19 @@ Future<void> _pumpDashboard(
   WidgetTester tester, {
   required List<TaskEntity> tasks,
   required bool hasScheduleItems,
+  bool hasBadge = false,
 }) async {
   tester.view.physicalSize = const Size(400, 1200);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
+
+  final achievementsDataSource = FakeAchievementsDataSource();
+  if (hasBadge) {
+    achievementsDataSource.progress = UserProgressModel.fromEntity(
+      UserProgressEntity(badgeUnlockedAt: {'first_steps': DateTime.now()}),
+    );
+  }
 
   await tester.pumpWidget(
     ProviderScope(
@@ -84,6 +96,7 @@ Future<void> _pumpDashboard(
         ),
         tasksStreamProvider.overrideWith((ref) => Stream.value(tasks)),
         plannerRepositoryProvider.overrideWithValue(_FakePlannerRepository(hasItems: hasScheduleItems)),
+        achievementsRemoteDataSourceProvider.overrideWithValue(achievementsDataSource),
       ],
       child: const MaterialApp(home: DashboardPage()),
     ),
@@ -115,5 +128,11 @@ void main() {
   testWidgets('schedule item added before any task still counts its own step', (tester) async {
     await _pumpDashboard(tester, tasks: [], hasScheduleItems: true);
     expect(find.text('2/4'), findsOneWidget);
+  });
+
+  testWidgets('task + schedule item + unlocked badge: 4/4, all set', (tester) async {
+    await _pumpDashboard(tester, tasks: [_task()], hasScheduleItems: true, hasBadge: true);
+    expect(find.text('4/4'), findsOneWidget);
+    expect(find.textContaining("you're all set"), findsOneWidget);
   });
 }
