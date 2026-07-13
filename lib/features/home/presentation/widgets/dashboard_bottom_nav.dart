@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../achievements/presentation/providers/achievements_provider.dart';
 import '../../../achievements/presentation/utils/celebrate_badges.dart';
+import '../../../analytics/presentation/pages/analytics_page.dart';
 import '../../../notes/presentation/pages/notes_page.dart';
 import '../../../planner/presentation/pages/planner_page.dart';
 
@@ -45,7 +46,12 @@ class DashboardBottomNav extends ConsumerWidget {
           _NavItem(
             icon: Icons.bar_chart_rounded,
             label: 'Analytics',
-            onTap: () => _recordVisit(ref, context, 'analytics'),
+            onTap: () async {
+              await _recordVisit(ref, context, 'analytics');
+              if (context.mounted) {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AnalyticsPage()));
+              }
+            },
           ),
         ],
       ),

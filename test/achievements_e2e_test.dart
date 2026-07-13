@@ -14,6 +14,7 @@ import 'package:uni_verse/features/achievements/domain/level_calculator.dart';
 import 'package:uni_verse/features/achievements/domain/streak_calculator.dart';
 import 'package:uni_verse/features/achievements/presentation/pages/achievements_page.dart';
 import 'package:uni_verse/features/achievements/presentation/providers/achievements_provider.dart';
+import 'package:uni_verse/features/analytics/presentation/pages/analytics_page.dart';
 import 'package:uni_verse/features/auth/domain/entities/user_entity.dart';
 import 'package:uni_verse/features/auth/presentation/providers/auth_provider.dart';
 import 'package:uni_verse/features/home/presentation/pages/dashboard_page.dart';
@@ -315,7 +316,11 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
+    // Analytics nav item navigates away and back too, recording 'analytics' along the way.
     await tester.tap(find.descendant(of: bottomNav, matching: find.text('Analytics')));
+    await tester.pumpAndSettle();
+    expect(find.byType(AnalyticsPage), findsOneWidget);
+    await tester.pageBack();
     await tester.pumpAndSettle();
 
     // Planner nav item navigates away and back, recording 'planner' along the way.

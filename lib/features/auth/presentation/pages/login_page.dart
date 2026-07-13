@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/uni_verse_logo.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/legal_links_text.dart';
 import '../widgets/social_button.dart';
 import '../widgets/uni_card_grid.dart';
 
@@ -206,15 +207,7 @@ class LoginPage extends ConsumerWidget {
 
           const SizedBox(height: 10),
 
-          Text(
-            'By continuing, you agree to our Terms & Privacy Policy',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              color: AppColors.muted,
-              height: 1.5,
-            ),
-          ),
+          const LegalLinksText(),
         ],
       ),
     );
