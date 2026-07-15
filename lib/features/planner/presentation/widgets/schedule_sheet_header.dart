@@ -27,9 +27,11 @@ class ScheduleSheetHeader extends StatelessWidget {
                 style: GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.ink),
               ),
             ),
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: const Icon(Icons.close_rounded, color: AppColors.muted),
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.close_rounded, color: AppColors.muted),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
             ),
           ],
         ),

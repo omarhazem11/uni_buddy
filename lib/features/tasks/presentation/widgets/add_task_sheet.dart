@@ -34,6 +34,7 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
   Duration? _reminderOffset;
   bool _isCustomReminder = false;
   DateTime? _customReminderDateTime;
+  bool _saving = false;
 
   @override
   void initState() {
@@ -58,7 +59,7 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final saving = ref.watch(taskActionsProvider).isLoading;
+    final saving = _saving || ref.watch(taskActionsProvider).isLoading;
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -126,7 +127,8 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
   }
 
   Future<void> _save() async {
-    if (!_canSave) return;
+    if (!_canSave || _saving) return;
+    setState(() => _saving = true);
     final description = _descriptionController.text.trim();
 
     final success = await saveTaskFromSheet(

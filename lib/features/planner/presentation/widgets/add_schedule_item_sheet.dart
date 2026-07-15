@@ -35,6 +35,7 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
   late DateTime _endTime;
   late String _colorHex;
   late String _emoji;
+  bool _saving = false;
 
   @override
   void initState() {
@@ -54,7 +55,7 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final saving = ref.watch(plannerActionsProvider).isLoading;
+    final saving = _saving || ref.watch(plannerActionsProvider).isLoading;
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -115,7 +116,8 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
   }
 
   Future<void> _save() async {
-    if (!_canSave) return;
+    if (!_canSave || _saving) return;
+    setState(() => _saving = true);
     final description = _descriptionController.text.trim();
 
     final success = await saveScheduleItemFromSheet(

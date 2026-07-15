@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
@@ -10,7 +9,10 @@ import '../../domain/repositories/auth_repository.dart';
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
   return AuthRemoteDataSourceImpl(
     firebaseAuth: FirebaseAuth.instance,
-    googleSignIn: GoogleSignIn(scopes: ['email']),
+    // No googleSignIn override — let AuthRemoteDataSourceImpl use its
+    // default which includes serverClientId, required for the native
+    // account-picker flow on Android. Without it the plugin falls back
+    // to a slow browser-based OAuth round-trip.
   );
 });
 

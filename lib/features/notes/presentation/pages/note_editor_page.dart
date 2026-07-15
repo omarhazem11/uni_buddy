@@ -30,6 +30,7 @@ class _NoteEditorPageState extends ConsumerState<NoteEditorPage> {
   late List<String> _tags = List.of(widget.existingNote?.tags ?? const []);
   late String _colorHex = widget.existingNote?.colorHex ?? plannerColorPalette[1];
   late String? _linkedTaskId;
+  bool _saving = false;
 
   @override
   void initState() {
@@ -44,13 +45,16 @@ class _NoteEditorPageState extends ConsumerState<NoteEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    final saving = ref.watch(noteActionsProvider).isLoading;
+    final saving = _saving || ref.watch(noteActionsProvider).isLoading;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        if (_hasContent) await _persist();
+        if (_hasContent && !_saving) {
+          setState(() => _saving = true);
+          await _persist();
+        }
         // ignore: use_build_context_synchronously
         if (mounted) Navigator.of(context).pop();
       },
