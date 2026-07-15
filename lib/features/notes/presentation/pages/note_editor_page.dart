@@ -30,7 +30,7 @@ class _NoteEditorPageState extends ConsumerState<NoteEditorPage> {
   late List<String> _tags = List.of(widget.existingNote?.tags ?? const []);
   late String _colorHex = widget.existingNote?.colorHex ?? plannerColorPalette[1];
   late String? _linkedTaskId;
-  bool _saving = false;
+  bool _exiting = false;
 
   @override
   void initState() {
@@ -43,20 +43,27 @@ class _NoteEditorPageState extends ConsumerState<NoteEditorPage> {
   bool get _hasContent =>
       _titleController.text.trim().isNotEmpty || _bodyController.text.trim().isNotEmpty;
 
+  // Single exit path for all routes out (done button, system back, swipe).
+  // Captures the navigator BEFORE the async gap so it stays valid after await.
+  void _handleExit() {
+    if (_exiting) return;
+    _exiting = true;
+    if (mounted) setState(() {});
+    final nav = Navigator.of(context);
+    Future(() async {
+      if (_hasContent) await _persist();
+      nav.pop();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final saving = _saving || ref.watch(noteActionsProvider).isLoading;
+    final saving = _exiting || ref.watch(noteActionsProvider).isLoading;
 
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, _) async {
-        if (didPop) return;
-        if (_hasContent && !_saving) {
-          setState(() => _saving = true);
-          await _persist();
-        }
-        // ignore: use_build_context_synchronously
-        if (mounted) Navigator.of(context).pop();
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _handleExit();
       },
       child: Scaffold(
         backgroundColor: AppColors.bg,
@@ -76,7 +83,7 @@ class _NoteEditorPageState extends ConsumerState<NoteEditorPage> {
               ),
             IconButton(
               key: const Key('noteEditorSaveButton'),
-              onPressed: saving ? null : () => Navigator.maybePop(context),
+              onPressed: saving ? null : _handleExit,
               icon: const Icon(Icons.check_rounded, color: AppColors.violet),
             ),
           ],

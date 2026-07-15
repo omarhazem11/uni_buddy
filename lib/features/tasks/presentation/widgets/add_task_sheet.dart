@@ -129,20 +129,23 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
   Future<void> _save() async {
     if (!_canSave || _saving) return;
     setState(() => _saving = true);
-    final description = _descriptionController.text.trim();
-
-    final success = await saveTaskFromSheet(
-      ref: ref,
-      existingTask: widget.existingTask,
-      title: _titleController.text.trim(),
-      description: description.isEmpty ? null : description,
-      priority: _priority,
-      category: _category,
-      dueDate: _dueDate,
-      reminderOffset: _dueDate == null || _isCustomReminder ? null : _reminderOffset,
-      customReminderDateTime: _dueDate == null || !_isCustomReminder ? null : _customReminderDateTime,
-    );
-
-    if (success && mounted) Navigator.pop(context);
+    try {
+      final description = _descriptionController.text.trim();
+      final success = await saveTaskFromSheet(
+        ref: ref,
+        existingTask: widget.existingTask,
+        title: _titleController.text.trim(),
+        description: description.isEmpty ? null : description,
+        priority: _priority,
+        category: _category,
+        dueDate: _dueDate,
+        reminderOffset: _dueDate == null || _isCustomReminder ? null : _reminderOffset,
+        customReminderDateTime: _dueDate == null || !_isCustomReminder ? null : _customReminderDateTime,
+      );
+      if (success && mounted) Navigator.pop(context);
+    } finally {
+      // Reset so the user can retry or close if the write failed.
+      if (mounted) setState(() => _saving = false);
+    }
   }
 }

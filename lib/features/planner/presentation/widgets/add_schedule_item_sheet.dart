@@ -118,26 +118,29 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
   Future<void> _save() async {
     if (!_canSave || _saving) return;
     setState(() => _saving = true);
-    final description = _descriptionController.text.trim();
+    try {
+      final description = _descriptionController.text.trim();
+      final success = await saveScheduleItemFromSheet(
+        ref: ref,
+        existingItem: widget.existingItem,
+        title: _titleController.text.trim(),
+        description: description.isEmpty ? null : description,
+        date: _date,
+        startTime: _startTime,
+        endTime: _endTime,
+        colorHex: _colorHex,
+        emoji: _emoji,
+      );
+      if (!success || !mounted) return;
 
-    final success = await saveScheduleItemFromSheet(
-      ref: ref,
-      existingItem: widget.existingItem,
-      title: _titleController.text.trim(),
-      description: description.isEmpty ? null : description,
-      date: _date,
-      startTime: _startTime,
-      endTime: _endTime,
-      colorHex: _colorHex,
-      emoji: _emoji,
-    );
-    if (!success || !mounted) return;
+      if (!_isEditing) {
+        await ref.read(achievementsActionsProvider.notifier).recordPlannerItemAdded(itemDate: _date);
+        if (mounted) await recalculateAndCelebrate(context, ref);
+      }
 
-    if (!_isEditing) {
-      await ref.read(achievementsActionsProvider.notifier).recordPlannerItemAdded(itemDate: _date);
-      if (mounted) await recalculateAndCelebrate(context, ref);
+      if (mounted) Navigator.pop(context);
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
-
-    if (mounted) Navigator.pop(context);
   }
 }
