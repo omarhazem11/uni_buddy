@@ -44,21 +44,42 @@ class _NoteEditorPageState extends ConsumerState<NoteEditorPage> {
       _titleController.text.trim().isNotEmpty || _bodyController.text.trim().isNotEmpty;
 
   // Single exit path for all routes out (done button, system back, swipe).
-  // Captures the navigator BEFORE the async gap so it stays valid after await.
+  // Pops immediately — Firebase offline cache commits locally before the
+  // network round-trip, so content is persisted even before server confirms.
   void _handleExit() {
     if (_exiting) return;
     _exiting = true;
-    if (mounted) setState(() {});
-    final nav = Navigator.of(context);
-    Future(() async {
-      if (_hasContent) await _persist();
-      nav.pop();
-    });
+
+    // Capture before pop — controllers and ref may be disposed afterward.
+    final hasContent = _hasContent;
+    final title = _titleController.text.trim();
+    final body = _bodyController.text.trim();
+    final tags = List<String>.of(_tags);
+    final colorHex = _colorHex;
+    final linkedTaskId = _linkedTaskId;
+    final existingNote = widget.existingNote;
+    final notifier = ref.read(noteActionsProvider.notifier);
+
+    Navigator.of(context).pop();
+
+    if (!hasContent) return;
+    if (existingNote == null) {
+      notifier.addNote(title: title, body: body, tags: tags, linkedTaskId: linkedTaskId, colorHex: colorHex);
+    } else {
+      notifier.updateNote(existingNote.copyWith(
+        title: title,
+        body: body,
+        tags: tags,
+        linkedTaskId: linkedTaskId,
+        clearLinkedTaskId: linkedTaskId == null,
+        colorHex: colorHex,
+      ));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final saving = _exiting || ref.watch(noteActionsProvider).isLoading;
+    final saving = _exiting;
 
     return PopScope(
       canPop: false,
@@ -129,30 +150,4 @@ class _NoteEditorPageState extends ConsumerState<NoteEditorPage> {
     if (mounted) Navigator.of(context).pop();
   }
 
-  Future<void> _persist() async {
-    final title = _titleController.text.trim();
-    final body = _bodyController.text.trim();
-    final notifier = ref.read(noteActionsProvider.notifier);
-
-    if (widget.existingNote == null) {
-      await notifier.addNote(
-        title: title,
-        body: body,
-        tags: _tags,
-        linkedTaskId: _linkedTaskId,
-        colorHex: _colorHex,
-      );
-    } else {
-      await notifier.updateNote(
-        widget.existingNote!.copyWith(
-          title: title,
-          body: body,
-          tags: _tags,
-          linkedTaskId: _linkedTaskId,
-          clearLinkedTaskId: _linkedTaskId == null,
-          colorHex: _colorHex,
-        ),
-      );
-    }
-  }
 }

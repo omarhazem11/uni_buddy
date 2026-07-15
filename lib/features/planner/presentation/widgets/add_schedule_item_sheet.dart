@@ -35,7 +35,7 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
   late DateTime _endTime;
   late String _colorHex;
   late String _emoji;
-  bool _saving = false;
+  bool _submitted = false;
 
   @override
   void initState() {
@@ -55,8 +55,6 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final saving = _saving || ref.watch(plannerActionsProvider).isLoading;
-
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
@@ -106,7 +104,7 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
                 const ScheduleSheetFieldLabel('Color'),
                 ScheduleColorPicker(selectedHex: _colorHex, onChanged: (c) => setState(() => _colorHex = c)),
                 const SizedBox(height: 24),
-                ScheduleSaveButton(saving: saving, enabled: _canSave, onPressed: _save),
+                ScheduleSaveButton(saving: false, enabled: _canSave && !_submitted, onPressed: _save),
               ],
             ),
           ),
@@ -115,32 +113,38 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
     );
   }
 
-  Future<void> _save() async {
-    if (!_canSave || _saving) return;
-    setState(() => _saving = true);
-    try {
-      final description = _descriptionController.text.trim();
+  void _save() {
+    if (!_canSave || _submitted) return;
+    _submitted = true;
+
+    // Capture before pop — controllers are disposed with the widget.
+    final title = _titleController.text.trim();
+    final rawDesc = _descriptionController.text.trim();
+    final isEditing = _isEditing;
+    final date = _date;
+    // ScaffoldMessenger lives at the app level and stays alive after pop.
+    final messenger = ScaffoldMessenger.maybeOf(context);
+
+    Navigator.pop(context);
+
+    () async {
       final success = await saveScheduleItemFromSheet(
         ref: ref,
         existingItem: widget.existingItem,
-        title: _titleController.text.trim(),
-        description: description.isEmpty ? null : description,
-        date: _date,
+        title: title,
+        description: rawDesc.isEmpty ? null : rawDesc,
+        date: date,
         startTime: _startTime,
         endTime: _endTime,
         colorHex: _colorHex,
         emoji: _emoji,
       );
-      if (!success || !mounted) return;
-
-      if (!_isEditing) {
-        await ref.read(achievementsActionsProvider.notifier).recordPlannerItemAdded(itemDate: _date);
-        if (mounted) await recalculateAndCelebrate(context, ref);
+      if (!success || isEditing) return;
+      await ref.read(achievementsActionsProvider.notifier).recordPlannerItemAdded(itemDate: date);
+      final newBadges = await ref.read(achievementsActionsProvider.notifier).recalculateBadges();
+      for (final badge in newBadges) {
+        messenger?.showSnackBar(badgeUnlockSnackBar(badge));
       }
-
-      if (mounted) Navigator.pop(context);
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
+    }();
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/task_entity.dart';
-import '../providers/task_provider.dart';
 import 'task_category_selector.dart';
 import 'task_due_date_row.dart';
 import 'task_priority_selector.dart';
@@ -34,7 +33,7 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
   Duration? _reminderOffset;
   bool _isCustomReminder = false;
   DateTime? _customReminderDateTime;
-  bool _saving = false;
+  bool _submitted = false;
 
   @override
   void initState() {
@@ -59,8 +58,6 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final saving = _saving || ref.watch(taskActionsProvider).isLoading;
-
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
@@ -104,7 +101,7 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
                   onCustomChanged: (dt) => setState(() => _customReminderDateTime = dt),
                 ),
                 const SizedBox(height: 24),
-                TaskSaveButton(saving: saving, enabled: _canSave, onPressed: _save),
+                TaskSaveButton(saving: false, enabled: _canSave && !_submitted, onPressed: _save),
               ],
             ),
           ),
@@ -126,26 +123,28 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
     });
   }
 
-  Future<void> _save() async {
-    if (!_canSave || _saving) return;
-    setState(() => _saving = true);
-    try {
-      final description = _descriptionController.text.trim();
-      final success = await saveTaskFromSheet(
-        ref: ref,
-        existingTask: widget.existingTask,
-        title: _titleController.text.trim(),
-        description: description.isEmpty ? null : description,
-        priority: _priority,
-        category: _category,
-        dueDate: _dueDate,
-        reminderOffset: _dueDate == null || _isCustomReminder ? null : _reminderOffset,
-        customReminderDateTime: _dueDate == null || !_isCustomReminder ? null : _customReminderDateTime,
-      );
-      if (success && mounted) Navigator.pop(context);
-    } finally {
-      // Reset so the user can retry or close if the write failed.
-      if (mounted) setState(() => _saving = false);
-    }
+  void _save() {
+    if (!_canSave || _submitted) return;
+    _submitted = true;
+
+    // Capture controller values before pop — controllers are disposed with the widget.
+    final title = _titleController.text.trim();
+    final rawDesc = _descriptionController.text.trim();
+
+    // Close immediately. Firebase writes to local cache before the network
+    // round-trip, so data is already visible to the rest of the app.
+    Navigator.pop(context);
+
+    saveTaskFromSheet(
+      ref: ref,
+      existingTask: widget.existingTask,
+      title: title,
+      description: rawDesc.isEmpty ? null : rawDesc,
+      priority: _priority,
+      category: _category,
+      dueDate: _dueDate,
+      reminderOffset: _dueDate == null || _isCustomReminder ? null : _reminderOffset,
+      customReminderDateTime: _dueDate == null || !_isCustomReminder ? null : _customReminderDateTime,
+    );
   }
 }
