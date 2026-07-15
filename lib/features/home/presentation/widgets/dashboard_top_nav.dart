@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/uni_verse_logo.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../onboarding/presentation/pages/coming_soon_page.dart';
+import '../../../settings/presentation/pages/account_settings_page.dart';
 
-class DashboardTopNav extends ConsumerWidget {
+class DashboardTopNav extends StatelessWidget {
   const DashboardTopNav({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       decoration: const BoxDecoration(
@@ -46,10 +46,7 @@ class DashboardTopNav extends ConsumerWidget {
                 onTap: () {},
               ),
               const SizedBox(width: 12),
-              _KebabMenu(
-                onSignOut: () =>
-                    ref.read(authNotifierProvider.notifier).signOut(),
-              ),
+              const _KebabMenu(),
             ],
           ),
         ],
@@ -88,9 +85,7 @@ class _NavIconButton extends StatelessWidget {
 }
 
 class _KebabMenu extends StatelessWidget {
-  final VoidCallback onSignOut;
-
-  const _KebabMenu({required this.onSignOut});
+  const _KebabMenu();
 
   @override
   Widget build(BuildContext context) {
@@ -105,13 +100,44 @@ class _KebabMenu extends StatelessWidget {
         padding: EdgeInsets.zero,
         icon: const Icon(Icons.more_vert_rounded, color: AppColors.violet, size: 20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        onSelected: (value) {
-          if (value == 'sign_out') onSignOut();
-        },
+        onSelected: (value) => _onSelected(context, value),
         itemBuilder: (context) => [
-          const PopupMenuItem(value: 'sign_out', child: Text('Sign out')),
+          const PopupMenuItem(
+            value: 'explore_universities',
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.explore_rounded, size: 18, color: AppColors.coral),
+                SizedBox(width: 10),
+                Flexible(
+                  child: Text('Explore Universities', overflow: TextOverflow.ellipsis),
+                ),
+              ],
+            ),
+          ),
+          const PopupMenuDivider(),
+          const PopupMenuItem(
+            value: 'settings',
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.settings_outlined, size: 18, color: AppColors.violet),
+                SizedBox(width: 10),
+                Text('Settings'),
+              ],
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  void _onSelected(BuildContext context, String value) {
+    switch (value) {
+      case 'explore_universities':
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ComingSoonPage()));
+      case 'settings':
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AccountSettingsPage()));
+    }
   }
 }

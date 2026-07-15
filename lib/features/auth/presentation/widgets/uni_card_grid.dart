@@ -169,7 +169,7 @@ class _AnimatedUniCardState extends State<AnimatedUniCard>
         ),
       ),
       child: Container(
-        height: 62,
+        height: 68,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: widget.data.color.withValues(alpha: 0.15),
@@ -210,6 +210,8 @@ class _AnimatedUniCardState extends State<AnimatedUniCard>
                   ),
                   Text(
                     widget.data.location,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 10,
                       color: AppColors.muted,

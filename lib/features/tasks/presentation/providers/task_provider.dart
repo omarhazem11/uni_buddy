@@ -2,12 +2,17 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/task_remote_datasource.dart';
 import '../../data/repositories/task_repository_impl.dart';
 import '../../domain/entities/task_entity.dart';
 import '../../domain/repositories/task_repository.dart';
 
 final taskRemoteDataSourceProvider = Provider<TaskRemoteDataSource>((ref) {
+  // Depending on the uid (not just reading it) means switching accounts
+  // disposes this provider and its cached Firestore subscription — see
+  // currentUidProvider's doc comment for why that matters.
+  ref.watch(currentUidProvider);
   return TaskRemoteDataSourceImpl();
 });
 

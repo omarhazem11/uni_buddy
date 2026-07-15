@@ -26,6 +26,18 @@ final authStateProvider = StreamProvider<UserEntity?>((ref) {
   return ref.watch(authRepositoryProvider).authStateChanges;
 });
 
+// Just the signed-in user's id (or null when signed out), collapsed via
+// .select so this only notifies when the *uid itself* changes — not on
+// every AsyncLoading/AsyncData transition for the same user. Per-user data
+// providers (tasks, notes, planner, achievements) watch this so switching
+// accounts invalidates their cached Firestore subscriptions instead of
+// leaving them bound to whichever uid was signed in when they were first
+// created — otherwise the previous account's data keeps streaming in until
+// something forces a full provider-tree rebuild (e.g. an app restart).
+final currentUidProvider = Provider<String?>((ref) {
+  return ref.watch(authStateProvider.select((async) => async.value?.id));
+});
+
 // Auth Notifier
 class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
   final AuthRepository _authRepository;
@@ -54,6 +66,21 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
   Future<void> signOut() async {
     await _authRepository.signOut();
     state = const AsyncValue.data(null);
+  }
+
+  Future<bool> deleteAccount() async {
+    state = const AsyncValue.loading();
+    final result = await _authRepository.deleteAccount();
+    return result.fold(
+      (failure) {
+        state = AsyncValue.error(failure.message, StackTrace.current);
+        return false;
+      },
+      (_) {
+        state = const AsyncValue.data(null);
+        return true;
+      },
+    );
   }
 }
 

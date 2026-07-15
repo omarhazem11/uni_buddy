@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/planner_remote_datasource.dart';
 import '../../data/repositories/planner_repository_impl.dart';
 import '../../domain/entities/planner_settings_entity.dart';
@@ -11,6 +12,7 @@ import '../../domain/repositories/planner_repository.dart';
 DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
 final plannerRemoteDataSourceProvider = Provider<PlannerRemoteDataSource>((ref) {
+  ref.watch(currentUidProvider);
   return PlannerRemoteDataSourceImpl();
 });
 

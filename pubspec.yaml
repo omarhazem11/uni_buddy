@@ -45,6 +45,11 @@ dependencies:
   # Links
   url_launcher: ^6.3.1
 
+  # Export + version
+  share_plus: ^10.0.0
+  package_info_plus: ^8.0.0
+  archive: ^4.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

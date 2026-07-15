@@ -35,14 +35,16 @@ class AchievementsRemoteDataSourceImpl implements AchievementsRemoteDataSource {
 
   @override
   Stream<UserProgressModel> watchProgress() {
-    return _doc.snapshots().asyncMap((snapshot) async {
-      if (!snapshot.exists) {
-        final initial = UserProgressModel.initial();
-        await _doc.set(initial.toFirestore());
-        return initial;
-      }
-      return UserProgressModel.fromFirestore(snapshot);
-    });
+    // Deliberately read-only — UserProgressModel.fromFirestore already
+    // falls back to defaults when the doc doesn't exist, so there's no
+    // need to write anything back here. An earlier version wrote the
+    // initial doc on first observation, which meant any screen watching
+    // this stream while account deletion was wiping it would immediately
+    // recreate it via this same snapshot listener, resurrecting the doc
+    // moments after it was deleted. The doc still gets created lazily by
+    // the record*/unlock* methods below (.set with merge, or .update on a
+    // doc those callers ensure exists first), same as before.
+    return _doc.snapshots().map(UserProgressModel.fromFirestore);
   }
 
   @override
@@ -114,13 +116,12 @@ class AchievementsRemoteDataSourceImpl implements AchievementsRemoteDataSource {
     for (final entry in newUnlocks.entries) {
       updates['badgeUnlockedAt.${entry.key}'] = Timestamp.fromDate(entry.value);
     }
-    // Deliberately .update(), not .set(merge: true) — Firestore only
-    // interprets dotted string keys as nested-map paths for update();
-    // set(merge: true) treats "badgeUnlockedAt.first_steps" as one
-    // literal field name containing a dot, so the badgeUnlockedAt map
-    // itself never actually gained any entries. Safe to assume the doc
-    // exists here: recalculateBadges() always reads via watchProgress()
-    // first, which creates it if missing.
+    // Ensure the doc exists first — a merge-set is a harmless no-op if it
+    // already does. The update() below is required (not set merge:true)
+    // for the dotted keys to be interpreted as nested-map paths rather
+    // than one literal field name containing a dot, but update() throws
+    // NOT_FOUND on a doc that doesn't exist yet, so it can't stand alone.
+    await _doc.set({}, SetOptions(merge: true));
     await _doc.update(updates);
   }
 }

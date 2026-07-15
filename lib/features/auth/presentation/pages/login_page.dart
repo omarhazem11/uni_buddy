@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/uni_verse_logo.dart';
+import '../providers/account_deletion_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/legal_links_text.dart';
 import '../widgets/social_button.dart';
@@ -29,6 +30,33 @@ class LoginPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
+
+    // Watched (not ref.listen) deliberately: the flag is set to true
+    // *before* LoginPage ever mounts (deletion pops back to root, then
+    // LoginPage appears once AuthGate sees the signed-out state), so this
+    // needs to react to the value already being true on the very first
+    // build — ref.listen alone only reacts to changes from here forward and
+    // would silently miss it. The side effect and the reset are deferred
+    // (post-frame / microtask) since providers can't be mutated mid-build.
+    final justDeleted = ref.watch(accountJustDeletedProvider);
+    if (justDeleted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Your account has been deleted',
+              style: GoogleFonts.inter(color: Colors.white),
+            ),
+            backgroundColor: AppColors.ink2,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      });
+      Future.microtask(() => ref.read(accountJustDeletedProvider.notifier).state = false);
+    }
 
     return Scaffold(
       backgroundColor: AppColors.ink,
@@ -132,11 +160,14 @@ class LoginPage extends ConsumerWidget {
         const SizedBox(width: 6),
         _colorDot(AppColors.amber),
         const SizedBox(width: 10),
-        Text(
-          '+46 more universities inside',
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            color: Colors.white.withValues(alpha: 0.35),
+        Flexible(
+          child: Text(
+            '+46 more universities inside',
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: Colors.white.withValues(alpha: 0.35),
+            ),
           ),
         ),
       ],

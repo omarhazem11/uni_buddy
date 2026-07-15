@@ -2,12 +2,14 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/note_remote_datasource.dart';
 import '../../data/repositories/note_repository_impl.dart';
 import '../../domain/entities/note_entity.dart';
 import '../../domain/repositories/note_repository.dart';
 
 final noteRemoteDataSourceProvider = Provider<NoteRemoteDataSource>((ref) {
+  ref.watch(currentUidProvider);
   return NoteRemoteDataSourceImpl();
 });
 

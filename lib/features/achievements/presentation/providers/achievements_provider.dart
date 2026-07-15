@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/achievements_remote_datasource.dart';
 import '../../data/repositories/achievements_repository_impl.dart';
 import '../../domain/entities/badge_entity.dart';
@@ -8,6 +9,7 @@ import '../../domain/entities/user_progress_entity.dart';
 import '../../domain/repositories/achievements_repository.dart';
 
 final achievementsRemoteDataSourceProvider = Provider<AchievementsRemoteDataSource>((ref) {
+  ref.watch(currentUidProvider);
   return AchievementsRemoteDataSourceImpl();
 });
 

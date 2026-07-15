@@ -51,12 +51,15 @@ class SocialButton extends StatelessWidget {
                 children: [
                   icon,
                   const SizedBox(width: 12),
-                  Text(
-                    label,
-                    style: GoogleFonts.nunito(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
+                  Flexible(
+                    child: Text(
+                      label,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.nunito(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
                     ),
                   ),
                 ],

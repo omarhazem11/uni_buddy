@@ -1,20 +1,20 @@
 import '../../domain/entities/user_type.dart';
 import '../../domain/repositories/onboarding_repository.dart';
-import '../datasources/onboarding_local_datasource.dart';
+import '../datasources/onboarding_remote_datasource.dart';
 
 class OnboardingRepositoryImpl implements OnboardingRepository {
-  final OnboardingLocalDataSource localDataSource;
+  final OnboardingRemoteDataSource remoteDataSource;
 
-  OnboardingRepositoryImpl({required this.localDataSource});
+  OnboardingRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<UserType?> getUserType() async {
-    final value = await localDataSource.getUserType();
+    final value = await remoteDataSource.getUserType();
     return UserType.fromStorageValue(value);
   }
 
   @override
   Future<void> setUserType(UserType type) async {
-    await localDataSource.setUserType(type.storageValue);
+    await remoteDataSource.setUserType(type.storageValue);
   }
 }

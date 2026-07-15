@@ -103,14 +103,14 @@ class PlannerRemoteDataSourceImpl implements PlannerRemoteDataSource {
 
   @override
   Stream<PlannerSettingsModel> watchSettings() {
-    return _settingsDoc.snapshots().asyncMap((snapshot) async {
-      if (!snapshot.exists) {
-        const defaults = PlannerSettingsModel();
-        await _settingsDoc.set(defaults.toFirestore());
-        return defaults;
-      }
-      return PlannerSettingsModel.fromFirestore(snapshot);
-    });
+    // Deliberately read-only — PlannerSettingsModel.fromFirestore already
+    // falls back to defaults when the doc doesn't exist. Writing the
+    // defaults back here (as an earlier version did) meant any screen
+    // watching this stream during account deletion would immediately
+    // recreate the doc the instant it was deleted, via this same snapshot
+    // listener. The doc is still created properly whenever the user
+    // actually changes a setting, via updateSettings()'s full set().
+    return _settingsDoc.snapshots().map(PlannerSettingsModel.fromFirestore);
   }
 
   @override
