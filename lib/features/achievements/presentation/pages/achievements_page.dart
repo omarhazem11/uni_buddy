@@ -33,10 +33,10 @@ class AchievementsPage extends ConsumerWidget {
       ),
       body: progressAsync.when(
         loading: () => const Center(child: CircularProgressIndicator(color: AppColors.violet)),
-        error: (_, __) => _ErrorText("Couldn't load your progress — pull down to try again."),
+        error: (_, __) => const _ErrorText("Couldn't load your progress — pull down to try again."),
         data: (progress) => badgesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.violet)),
-          error: (_, __) => _ErrorText("Couldn't load your badges — pull down to try again."),
+          error: (_, __) => const _ErrorText("Couldn't load your badges — pull down to try again."),
           data: (badges) => SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(

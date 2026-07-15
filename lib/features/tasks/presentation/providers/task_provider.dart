@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/task_remote_datasource.dart';
 import '../../data/repositories/task_repository_impl.dart';
@@ -52,19 +53,34 @@ class TaskActionsNotifier extends StateNotifier<AsyncValue<void>> {
       customReminderDateTime: customReminderDateTime,
       createdAt: DateTime.now(),
     );
-    return _run(() => _repository.addTask(task));
+    final ok = await _run(() => _repository.addTask(task));
+    if (ok) await NotificationService.scheduleTaskReminder(task);
+    return ok;
   }
 
-  Future<bool> updateTask(TaskEntity task) {
-    return _run(() => _repository.updateTask(task));
+  Future<bool> updateTask(TaskEntity task) async {
+    final ok = await _run(() => _repository.updateTask(task));
+    if (ok) {
+      await NotificationService.cancelTaskReminder(task.id);
+      if (!task.isCompleted) {
+        await NotificationService.scheduleTaskReminder(task);
+      }
+    }
+    return ok;
   }
 
-  Future<bool> toggleComplete(String taskId, bool isCompleted) {
-    return _run(() => _repository.toggleComplete(taskId, isCompleted));
+  Future<bool> toggleComplete(String taskId, bool isCompleted) async {
+    final ok = await _run(() => _repository.toggleComplete(taskId, isCompleted));
+    if (ok && isCompleted) {
+      await NotificationService.cancelTaskReminder(taskId);
+    }
+    return ok;
   }
 
-  Future<bool> deleteTask(String taskId) {
-    return _run(() => _repository.deleteTask(taskId));
+  Future<bool> deleteTask(String taskId) async {
+    final ok = await _run(() => _repository.deleteTask(taskId));
+    if (ok) await NotificationService.cancelTaskReminder(taskId);
+    return ok;
   }
 
   Future<bool> _run(Future<Either<Failure, void>> Function() action) async {

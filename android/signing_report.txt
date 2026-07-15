@@ -1,0 +1,305 @@
+
+> Configure project :gradle
+WARNING: Unsupported Kotlin plugin version.
+The `embedded-kotlin` and `kotlin-dsl` plugins rely on features of Kotlin `2.2.0` that might work differently than in the requested version `2.2.20`.
+
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:compileKotlin UP-TO-DATE
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :cloud_firestore
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':cloud_firestore' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :firebase_auth
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':firebase_auth' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :firebase_core
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':firebase_core' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :firebase_storage
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':firebase_storage' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :google_sign_in_android
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':google_sign_in_android' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :jni
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':jni' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :jni_flutter
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':jni_flutter' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :package_info_plus
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':package_info_plus' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :share_plus
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':share_plus' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :shared_preferences_android
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':shared_preferences_android' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :sqflite_android
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':sqflite_android' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Configure project :url_launcher_android
+w: [33m[1mDeprecated 'org.jetbrains.kotlin.android' plugin usage[0m[0m
+The 'org.jetbrains.kotlin.android' plugin in project ':url_launcher_android' is no longer required for Kotlin support since AGP 9.0.
+[32m[1mSolution:[0m[0m
+[32m[3mRemove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.[0m[0m
+[36mSee [0m[34mhttps://kotl.in/gradle/agp-built-in-kotlin[0m[36m for more details.[0m
+
+
+> Task :app:signingReport
+Variant: debug
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+Variant: release
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+Variant: profile
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :cloud_firestore:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :firebase_auth:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :firebase_core:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :firebase_storage:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :google_sign_in_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :jni:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :jni_flutter:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :package_info_plus:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :share_plus:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :shared_preferences_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :sqflite_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+> Task :url_launcher_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\dell\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:72:2B:C7:41:1D:90:34:49:B1:FF:F3:D8:43:1F:FA
+SHA1: F4:24:C9:CD:4E:46:5B:E8:A4:F3:E1:DB:95:46:F7:15:20:96:AF:E0
+SHA-256: 46:94:2D:09:45:E2:53:E0:E3:C3:0C:C4:E0:BE:2D:9D:0B:C7:62:C4:8C:19:76:72:03:CB:14:07:E9:6D:46:EA
+Valid until: Sunday, November 30, 2053
+----------
+
+[Incubating] Problems report is available at: file:///D:/UniBuddy/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 5s
+17 actionable tasks: 13 executed, 4 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.1.0/userguide/configuration_cache_enabling.html

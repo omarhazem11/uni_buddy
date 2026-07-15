@@ -1,0 +1,166 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:uuid/uuid.dart';
+import '../../features/notifications/domain/entities/notification_entity.dart';
+import '../../features/notifications/domain/repositories/notification_repository.dart';
+import '../../features/tasks/domain/entities/task_entity.dart';
+
+@pragma('vm:entry-point')
+void _onBackgroundNotificationResponse(NotificationResponse details) {
+  // Cold-start taps are handled via getNotificationAppLaunchDetails() in initialize().
+}
+
+class NotificationService {
+  static final _plugin = FlutterLocalNotificationsPlugin();
+  static NotificationRepository? _repository;
+  static Future<void> Function(String taskId)? _onTapNavigate;
+
+  static final navigatorKey = GlobalKey<NavigatorState>();
+
+  static const _channelId = 'task_reminders';
+  static const _channelName = 'Task Reminders';
+
+  static Future<void> initialize({
+    required NotificationRepository repository,
+    required Future<void> Function(String taskId) onTapNavigate,
+  }) async {
+    _repository = repository;
+    _onTapNavigate = onTapNavigate;
+
+    tz_data.initializeTimeZones();
+
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosInit = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
+
+    await _plugin.initialize(
+      const InitializationSettings(android: androidInit, iOS: iosInit),
+      onDidReceiveNotificationResponse: _onForegroundTap,
+      onDidReceiveBackgroundNotificationResponse: _onBackgroundNotificationResponse,
+    );
+
+    await _plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(const AndroidNotificationChannel(
+          _channelId,
+          _channelName,
+          description: 'Reminders for your upcoming tasks',
+          importance: Importance.high,
+        ));
+
+    final launchDetails = await _plugin.getNotificationAppLaunchDetails();
+    if (launchDetails?.didNotificationLaunchApp == true) {
+      final payload = launchDetails!.notificationResponse?.payload;
+      if (payload != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await _onTapNavigate?.call(payload);
+        });
+      }
+    }
+  }
+
+  static void _onForegroundTap(NotificationResponse response) {
+    final taskId = response.payload;
+    if (taskId != null) _onTapNavigate?.call(taskId);
+  }
+
+  static Future<void> requestPermission() async {
+    await _plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+    await _plugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
+  }
+
+  static DateTime? _reminderTime(TaskEntity task) {
+    if (task.customReminderDateTime != null) return task.customReminderDateTime;
+    if (task.dueDate != null &&
+        task.reminderOffset != null &&
+        task.reminderOffset != Duration.zero) {
+      return task.dueDate!.subtract(task.reminderOffset!);
+    }
+    return null;
+  }
+
+  static int _notifId(String taskId) => taskId.hashCode.abs() % 2147483647;
+
+  static Future<void> scheduleTaskReminder(
+    TaskEntity task, {
+    bool writeToInbox = true,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool('notifications_enabled') ?? true)) return;
+
+    final reminderTime = _reminderTime(task);
+    if (reminderTime == null || reminderTime.isBefore(DateTime.now())) return;
+
+    const details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        _channelId,
+        _channelName,
+        channelDescription: 'Reminders for your upcoming tasks',
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(),
+    );
+
+    final title = '⏰ ${task.title}';
+    final body = task.dueDate != null ? 'Due ${_formatDue(task.dueDate!)}' : 'Task reminder';
+
+    await _plugin.zonedSchedule(
+      _notifId(task.id),
+      title,
+      body,
+      tz.TZDateTime.from(reminderTime.toUtc(), tz.UTC),
+      details,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      payload: task.id,
+    );
+
+    if (writeToInbox) {
+      final record = NotificationEntity(
+        id: const Uuid().v4(),
+        taskId: task.id,
+        title: title,
+        body: body,
+        scheduledFor: reminderTime,
+        wasRead: false,
+        createdAt: DateTime.now(),
+      );
+      await _repository?.addNotificationRecord(record);
+    }
+  }
+
+  static Future<void> cancelTaskReminder(String taskId) async {
+    await _plugin.cancel(_notifId(taskId));
+  }
+
+  // Reschedules OS notifications only — does not write new inbox records so
+  // existing Firestore entries from task creation/update are not duplicated.
+  static Future<void> rescheduleAllReminders(List<TaskEntity> tasks) async {
+    await _plugin.cancelAll();
+    for (final task in tasks) {
+      if (!task.isCompleted) {
+        await scheduleTaskReminder(task, writeToInbox: false);
+      }
+    }
+  }
+
+  static String _formatDue(DateTime dt) {
+    final now = DateTime.now();
+    final diff = dt.difference(DateTime(now.year, now.month, now.day));
+    if (diff.inDays == 0) return 'today';
+    if (diff.inDays == 1) return 'tomorrow';
+    return '${dt.day}/${dt.month}/${dt.year}';
+  }
+}

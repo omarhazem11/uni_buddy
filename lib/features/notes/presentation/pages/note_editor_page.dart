@@ -51,6 +51,7 @@ class _NoteEditorPageState extends ConsumerState<NoteEditorPage> {
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         if (_hasContent) await _persist();
+        // ignore: use_build_context_synchronously
         if (mounted) Navigator.of(context).pop();
       },
       child: Scaffold(

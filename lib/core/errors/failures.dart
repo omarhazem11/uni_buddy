@@ -35,3 +35,7 @@ class AchievementsFailure extends Failure {
 class NoteFailure extends Failure {
   const NoteFailure(super.message);
 }
+
+class NotificationFailure extends Failure {
+  const NotificationFailure(super.message);
+}

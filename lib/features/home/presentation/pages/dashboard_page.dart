@@ -10,6 +10,7 @@ import '../../../tasks/presentation/pages/tasks_page.dart';
 import '../../../tasks/presentation/providers/task_provider.dart';
 import '../../../tasks/presentation/utils/task_stats.dart';
 import '../providers/dashboard_onboarding_provider.dart';
+import '../providers/greeting_provider.dart';
 import '../widgets/dashboard_bottom_nav.dart';
 import '../widgets/dashboard_getting_started_card.dart';
 import '../widgets/dashboard_hero_card.dart';
@@ -45,6 +46,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final firstName = (user?.displayName?.trim().isNotEmpty ?? false)
         ? user!.displayName!.trim().split(' ').first
         : 'there';
+
+    final greeting = ref.watch(greetingProvider).when(
+      data: (g) => g,
+      loading: clockGreeting,
+      error: (_, __) => clockGreeting(),
+    );
 
     final tasks = ref.watch(tasksStreamProvider).value ?? [];
     final dueThisWeek = tasks.dueWithin(const Duration(days: 7));
@@ -97,7 +104,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     DashboardHeroCard(
-                      greeting: 'Good morning, $firstName 👋',
+                      greeting: '$greeting, $firstName 👋',
                       subtitle: heroSubtitle,
                       onViewTasks: () => Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const TasksPage()),

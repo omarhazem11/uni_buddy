@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/uni_verse_logo.dart';
+import '../../../notifications/presentation/pages/notification_inbox_page.dart';
+import '../../../notifications/presentation/providers/notification_provider.dart';
 import '../../../onboarding/presentation/pages/coming_soon_page.dart';
 import '../../../settings/presentation/pages/account_settings_page.dart';
 
-class DashboardTopNav extends StatelessWidget {
+class DashboardTopNav extends ConsumerWidget {
   const DashboardTopNav({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount = ref.watch(unreadCountProvider);
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       decoration: const BoxDecoration(
@@ -40,10 +45,11 @@ class DashboardTopNav extends StatelessWidget {
           ),
           Row(
             children: [
-              _NavIconButton(
-                icon: Icons.notifications_outlined,
-                iconColor: AppColors.violet,
-                onTap: () {},
+              _BellButton(
+                hasUnread: unreadCount > 0,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const NotificationInboxPage()),
+                ),
               ),
               const SizedBox(width: 12),
               const _KebabMenu(),
@@ -55,16 +61,11 @@ class DashboardTopNav extends StatelessWidget {
   }
 }
 
-class _NavIconButton extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
+class _BellButton extends StatelessWidget {
+  final bool hasUnread;
   final VoidCallback onTap;
 
-  const _NavIconButton({
-    required this.icon,
-    required this.iconColor,
-    required this.onTap,
-  });
+  const _BellButton({required this.hasUnread, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +79,26 @@ class _NavIconButton extends StatelessWidget {
           color: AppColors.bg,
           borderRadius: BorderRadius.circular(13),
         ),
-        child: Icon(icon, color: iconColor, size: 20),
+        child: Stack(
+          children: [
+            const Center(
+              child: Icon(Icons.notifications_outlined, color: AppColors.violet, size: 20),
+            ),
+            if (hasUnread)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppColors.coral,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

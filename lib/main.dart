@@ -1,17 +1,24 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'core/services/notification_service.dart';
 import 'core/theme/app_colors.dart';
 import 'core/widgets/uni_verse_logo.dart';
-import 'firebase_options.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/home/presentation/pages/dashboard_page.dart';
+import 'features/notifications/presentation/providers/notification_provider.dart';
 import 'features/onboarding/domain/entities/user_type.dart';
 import 'features/onboarding/presentation/pages/coming_soon_page.dart';
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/onboarding/presentation/providers/onboarding_provider.dart';
+import 'features/tasks/data/models/task_model.dart';
+import 'features/tasks/presentation/pages/task_detail_page.dart';
+import 'features/tasks/presentation/providers/task_provider.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +40,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Uni-Verse',
       debugShowCheckedModeBanner: false,
+      navigatorKey: NotificationService.navigatorKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.violet),
         useMaterial3: true,
@@ -74,11 +82,52 @@ class _AuthGateState extends ConsumerState<AuthGate> {
   }
 }
 
-class _PostLoginRouter extends ConsumerWidget {
+class _PostLoginRouter extends ConsumerStatefulWidget {
   const _PostLoginRouter();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_PostLoginRouter> createState() => _PostLoginRouterState();
+}
+
+class _PostLoginRouterState extends ConsumerState<_PostLoginRouter> {
+  @override
+  void initState() {
+    super.initState();
+    _initNotifications();
+  }
+
+  Future<void> _initNotifications() async {
+    final repository = ref.read(notificationRepositoryProvider);
+    await NotificationService.initialize(
+      repository: repository,
+      onTapNavigate: _handleNotificationTap,
+    );
+    await NotificationService.requestPermission();
+
+    final tasks = await ref.read(tasksStreamProvider.future);
+    await NotificationService.rescheduleAllReminders(tasks);
+  }
+
+  Future<void> _handleNotificationTap(String taskId) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('tasks')
+          .doc(taskId)
+          .get();
+      if (!doc.exists) return;
+      final task = TaskModel.fromFirestore(doc);
+      NotificationService.navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => TaskDetailPage(task: task)),
+      );
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final userTypeAsync = ref.watch(userTypeProvider);
 
     return userTypeAsync.when(

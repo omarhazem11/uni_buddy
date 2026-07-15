@@ -50,12 +50,29 @@ dependencies:
   package_info_plus: ^8.0.0
   archive: ^4.0.0
 
+  # Solar greeting
+  http: ^1.2.0
+
+  # Push notifications
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
   riverpod_generator: ^2.6.1
   build_runner: ^2.4.13
+  flutter_launcher_icons: ^0.14.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21
+  adaptive_icon_background: "#1A1033"
+  adaptive_icon_foreground: "assets/images/logo_adaptive_foreground.png"
 
 flutter:
   uses-material-design: true

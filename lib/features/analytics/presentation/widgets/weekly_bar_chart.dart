@@ -63,9 +63,9 @@ class _WeekBar extends StatelessWidget {
           const SizedBox(height: 4),
           Container(
             height: _chartHeight * fraction,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.violet,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
             ),
           ),
           const SizedBox(height: 6),

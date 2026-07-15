@@ -5,7 +5,7 @@ import '../models/user_model.dart';
 
 // Every subcollection a user's data lives in — kept in one place so a new
 // feature's collection doesn't get silently missed by account deletion.
-const _userSubcollections = ['tasks', 'notes', 'schedule_items', 'settings', 'progress'];
+const _userSubcollections = ['tasks', 'notes', 'schedule_items', 'settings', 'progress', 'notifications'];
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> signInWithGoogle();
@@ -24,7 +24,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     GoogleSignIn? googleSignIn,
     FirebaseFirestore? firestore,
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn(scopes: ['email']),
+        _googleSignIn = googleSignIn ??
+            GoogleSignIn(
+              scopes: ['email'],
+              // Required on Android to obtain an ID token for Firebase Auth.
+              // Without this, google_sign_in can't complete the OAuth handshake
+              // and throws ApiException: 7 (NETWORK_ERROR).
+              serverClientId:
+                  '603293938333-hvqq5qeatp9f3he8qc8iia30h9mpmg72.apps.googleusercontent.com',
+            ),
         _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
