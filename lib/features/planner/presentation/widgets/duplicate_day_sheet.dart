@@ -111,8 +111,9 @@ class _DuplicateDaySheetState extends ConsumerState<DuplicateDaySheet> {
     Navigator.pop(context);
 
     () async {
-      final success = await plannerNotifier.duplicateItemsToDate(sourceDate, targetDates);
-      if (!success) return;
+      // Fire duplicate write without awaiting server ack — local cache is
+      // written synchronously so stream shows copied items immediately.
+      plannerNotifier.duplicateItemsToDate(sourceDate, targetDates);
 
       messenger?.showSnackBar(
         SnackBar(

@@ -69,7 +69,10 @@ class AchievementsRepositoryImpl implements AchievementsRepository {
       if (newUnlocks.isEmpty) return const Right([]);
 
       final pointsAwarded = newlyUnlocked.fold<int>(0, (sum, b) => sum + b.points);
-      await remoteDataSource.unlockBadgesAndAwardPoints(newUnlocks, pointsAwarded);
+      // Don't await — writes to local cache synchronously so subsequent
+      // recalculate calls won't re-unlock the same badges (pending writes
+      // are visible to snapshot listeners immediately).
+      remoteDataSource.unlockBadgesAndAwardPoints(newUnlocks, pointsAwarded);
       return Right(newlyUnlocked);
     } catch (e) {
       return Left(AchievementsFailure(e.toString()));

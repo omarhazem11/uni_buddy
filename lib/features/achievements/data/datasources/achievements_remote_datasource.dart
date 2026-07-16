@@ -66,7 +66,10 @@ class AchievementsRemoteDataSourceImpl implements AchievementsRemoteDataSource {
     );
     if (!update.changed) return; // already recorded today — no-op
 
-    await _doc.set({
+    // Don't await — Firestore writes to local cache synchronously so
+    // snapshots() reflects the new data immediately. The Future only
+    // resolves after server ack, which hangs offline.
+    _doc.set({
       'currentStreak': update.currentStreak,
       'longestStreak': update.longestStreak,
       'lastActiveDate': Timestamp.fromDate(today),
@@ -75,14 +78,14 @@ class AchievementsRemoteDataSourceImpl implements AchievementsRemoteDataSource {
 
   @override
   Future<void> recordTabVisit(String tabName) async {
-    await _doc.set({
+    _doc.set({
       'visitedTabs': FieldValue.arrayUnion([tabName]),
     }, SetOptions(merge: true));
   }
 
   @override
   Future<void> recordTaskCompleted({required bool wasEarly}) async {
-    await _doc.set({
+    _doc.set({
       'tasksCompletedCount': FieldValue.increment(1),
       if (wasEarly) 'tasksCompletedEarlyCount': FieldValue.increment(1),
     }, SetOptions(merge: true));
@@ -108,7 +111,7 @@ class AchievementsRemoteDataSourceImpl implements AchievementsRemoteDataSource {
     final currentMax = data['maxScheduledDaysInAWeek'] as int? ?? 0;
     final newMax = thisWeek.length > currentMax ? thisWeek.length : currentMax;
 
-    await _doc.set({
+    _doc.set({
       'plannerItemsCount': FieldValue.increment(1),
       'scheduledWeekDates': weekDates,
       'maxScheduledDaysInAWeek': newMax,
@@ -117,7 +120,7 @@ class AchievementsRemoteDataSourceImpl implements AchievementsRemoteDataSource {
 
   @override
   Future<void> recordDuplicateDayUsed() async {
-    await _doc.set({'hasUsedDuplicateDay': true}, SetOptions(merge: true));
+    _doc.set({'hasUsedDuplicateDay': true}, SetOptions(merge: true));
   }
 
   @override
@@ -131,7 +134,8 @@ class AchievementsRemoteDataSourceImpl implements AchievementsRemoteDataSource {
     // for the dotted keys to be interpreted as nested-map paths rather
     // than one literal field name containing a dot, but update() throws
     // NOT_FOUND on a doc that doesn't exist yet, so it can't stand alone.
-    await _doc.set({}, SetOptions(merge: true));
-    await _doc.update(updates);
+    // Neither call is awaited — both write to local cache synchronously.
+    _doc.set({}, SetOptions(merge: true));
+    _doc.update(updates);
   }
 }

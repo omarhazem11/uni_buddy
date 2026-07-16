@@ -130,7 +130,10 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
     Navigator.pop(context);
 
     () async {
-      final success = await saveScheduleItemFromSheet(
+      // Fire planner write without awaiting — local cache is written
+      // synchronously so the stream shows the new item immediately.
+      // We don't need to wait for server ack before checking badges.
+      saveScheduleItemFromSheet(
         notifier: plannerNotifier,
         existingItem: widget.existingItem,
         title: title,
@@ -141,7 +144,7 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
         colorHex: _colorHex,
         emoji: _emoji,
       );
-      if (!success || isEditing) return;
+      if (isEditing) return;
       await achievementsNotifier.recordPlannerItemAdded(itemDate: date);
       final newBadges = await achievementsNotifier.recalculateBadges();
       for (final badge in newBadges) {

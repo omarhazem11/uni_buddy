@@ -78,11 +78,14 @@ class PlannerRemoteDataSourceImpl implements PlannerRemoteDataSource {
         .where('date', isLessThanOrEqualTo: Timestamp.fromDate(_endOfDay(sourceDate)));
     QuerySnapshot<Map<String, dynamic>> sourceSnapshot;
     try {
+      // Use cached query results (populated by the active stream listener on
+      // the planner page). Never fall back to server — that hangs offline.
       sourceSnapshot = await query.get(const GetOptions(source: Source.cache));
     } catch (_) {
-      sourceSnapshot = await query.get();
+      return; // source items not in cache — nothing to copy
     }
     final sourceItems = sourceSnapshot.docs.map(ScheduleItemModel.fromFirestore).toList();
+    if (sourceItems.isEmpty) return;
 
     final batch = _firestore.batch();
     for (final targetDate in targetDates) {
@@ -103,7 +106,9 @@ class PlannerRemoteDataSourceImpl implements PlannerRemoteDataSource {
         batch.set(_itemsRef.doc(newId), newItem.toFirestore());
       }
     }
-    await batch.commit();
+    // Don't await — writes to local cache synchronously, server sync happens
+    // in background. Stream listeners see the new items immediately.
+    batch.commit();
   }
 
   @override
