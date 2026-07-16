@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/task_entity.dart';
+import '../providers/task_provider.dart';
 import 'task_category_selector.dart';
 import 'task_due_date_row.dart';
 import 'task_priority_selector.dart';
@@ -127,16 +128,16 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
     if (!_canSave || _submitted) return;
     _submitted = true;
 
-    // Capture controller values before pop — controllers are disposed with the widget.
+    // Capture everything before pop — controllers and WidgetRef are both
+    // invalidated once the widget disposes after Navigator.pop().
     final title = _titleController.text.trim();
     final rawDesc = _descriptionController.text.trim();
+    final notifier = ref.read(taskActionsProvider.notifier);
 
-    // Close immediately. Firebase writes to local cache before the network
-    // round-trip, so data is already visible to the rest of the app.
     Navigator.pop(context);
 
     saveTaskFromSheet(
-      ref: ref,
+      notifier: notifier,
       existingTask: widget.existingTask,
       title: title,
       description: rawDesc.isEmpty ? null : rawDesc,

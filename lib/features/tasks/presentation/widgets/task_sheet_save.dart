@@ -1,11 +1,12 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/task_entity.dart';
 import '../providers/task_provider.dart';
 
 /// Extracted out of AddTaskSheet purely to keep that file under the
 /// 150-line limit — builds and dispatches the add/update call.
+/// Accepts the notifier directly so callers can capture it before
+/// Navigator.pop() — WidgetRef is invalidated after the widget disposes.
 Future<bool> saveTaskFromSheet({
-  required WidgetRef ref,
+  required TaskActionsNotifier notifier,
   required TaskEntity? existingTask,
   required String title,
   required String? description,
@@ -15,8 +16,6 @@ Future<bool> saveTaskFromSheet({
   required Duration? reminderOffset,
   required DateTime? customReminderDateTime,
 }) {
-  final notifier = ref.read(taskActionsProvider.notifier);
-
   if (existingTask != null) {
     return notifier.updateTask(existingTask.copyWith(
       title: title,

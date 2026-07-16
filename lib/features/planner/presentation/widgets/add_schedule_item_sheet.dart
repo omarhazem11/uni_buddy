@@ -117,19 +117,21 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
     if (!_canSave || _submitted) return;
     _submitted = true;
 
-    // Capture before pop — controllers are disposed with the widget.
+    // Capture everything before pop — controllers and WidgetRef are both
+    // invalidated once the widget disposes after Navigator.pop().
     final title = _titleController.text.trim();
     final rawDesc = _descriptionController.text.trim();
     final isEditing = _isEditing;
     final date = _date;
-    // ScaffoldMessenger lives at the app level and stays alive after pop.
+    final plannerNotifier = ref.read(plannerActionsProvider.notifier);
+    final achievementsNotifier = ref.read(achievementsActionsProvider.notifier);
     final messenger = ScaffoldMessenger.maybeOf(context);
 
     Navigator.pop(context);
 
     () async {
       final success = await saveScheduleItemFromSheet(
-        ref: ref,
+        notifier: plannerNotifier,
         existingItem: widget.existingItem,
         title: title,
         description: rawDesc.isEmpty ? null : rawDesc,
@@ -140,8 +142,8 @@ class _AddScheduleItemSheetState extends ConsumerState<AddScheduleItemSheet> {
         emoji: _emoji,
       );
       if (!success || isEditing) return;
-      await ref.read(achievementsActionsProvider.notifier).recordPlannerItemAdded(itemDate: date);
-      final newBadges = await ref.read(achievementsActionsProvider.notifier).recalculateBadges();
+      await achievementsNotifier.recordPlannerItemAdded(itemDate: date);
+      final newBadges = await achievementsNotifier.recalculateBadges();
       for (final badge in newBadges) {
         messenger?.showSnackBar(badgeUnlockSnackBar(badge));
       }
