@@ -29,10 +29,10 @@ class DuplicateDaySheet extends ConsumerStatefulWidget {
 class _DuplicateDaySheetState extends ConsumerState<DuplicateDaySheet> {
   final Set<DateTime> _selected = {};
   late DateTime _visibleMonth = dateOnly(widget.sourceDate);
+  bool _submitted = false;
 
   @override
   Widget build(BuildContext context) {
-    final saving = ref.watch(plannerActionsProvider).isLoading;
     final count = _selected.length;
     final today = dateOnly(DateTime.now());
 
@@ -84,7 +84,7 @@ class _DuplicateDaySheetState extends ConsumerState<DuplicateDaySheet> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                DuplicateDayConfirmButton(saving: saving, count: count, onPressed: _confirm),
+                DuplicateDayConfirmButton(saving: _submitted, count: count, onPressed: _confirm),
               ],
             ),
           ),
@@ -97,42 +97,42 @@ class _DuplicateDaySheetState extends ConsumerState<DuplicateDaySheet> {
 
   bool _isSameDate(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
 
-  Future<void> _confirm() async {
-    if (_selected.isEmpty) return;
+  void _confirm() {
+    if (_selected.isEmpty || _submitted) return;
+    _submitted = true;
+
     final count = _selected.length;
+    final sourceDate = widget.sourceDate;
+    final targetDates = _selected.toList();
+    final plannerNotifier = ref.read(plannerActionsProvider.notifier);
+    final achievementsNotifier = ref.read(achievementsActionsProvider.notifier);
+    final messenger = ScaffoldMessenger.maybeOf(context);
 
-    final success = await ref
-        .read(plannerActionsProvider.notifier)
-        .duplicateItemsToDate(widget.sourceDate, _selected.toList());
-    if (!success || !mounted) return;
-
-    // Record + recalculate before popping (context/ref stay valid), but
-    // queue the copy-success toast first and any badge celebration after —
-    // the confirmation the student is expecting should appear immediately,
-    // not wait behind a badge toast's duration.
-    await ref.read(achievementsActionsProvider.notifier).recordDuplicateDayUsed();
-    if (!mounted) return;
-    final newlyUnlocked = await ref.read(achievementsActionsProvider.notifier).recalculateBadges();
-    if (!mounted) return;
-
-    final messenger = ScaffoldMessenger.of(context);
     Navigator.pop(context);
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          'Schedule copied to $count day${count == 1 ? '' : 's'}! 🎉',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
+
+    () async {
+      final success = await plannerNotifier.duplicateItemsToDate(sourceDate, targetDates);
+      if (!success) return;
+
+      messenger?.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Schedule copied to $count day${count == 1 ? '' : 's'}! 🎉',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
+          ),
+          backgroundColor: AppColors.mint,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+          margin: const EdgeInsets.symmetric(horizontal: 70, vertical: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         ),
-        backgroundColor: AppColors.mint,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-        margin: const EdgeInsets.symmetric(horizontal: 70, vertical: 24),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      ),
-    );
-    for (final badge in newlyUnlocked) {
-      messenger.showSnackBar(badgeUnlockSnackBar(badge));
-    }
+      );
+      await achievementsNotifier.recordDuplicateDayUsed();
+      final newlyUnlocked = await achievementsNotifier.recalculateBadges();
+      for (final badge in newlyUnlocked) {
+        messenger?.showSnackBar(badgeUnlockSnackBar(badge));
+      }
+    }();
   }
 }

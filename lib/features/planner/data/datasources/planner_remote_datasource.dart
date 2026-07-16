@@ -73,10 +73,15 @@ class PlannerRemoteDataSourceImpl implements PlannerRemoteDataSource {
 
   @override
   Future<void> duplicateItemsToDate(DateTime sourceDate, List<DateTime> targetDates) async {
-    final sourceSnapshot = await _itemsRef
+    final query = _itemsRef
         .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(_startOfDay(sourceDate)))
-        .where('date', isLessThanOrEqualTo: Timestamp.fromDate(_endOfDay(sourceDate)))
-        .get();
+        .where('date', isLessThanOrEqualTo: Timestamp.fromDate(_endOfDay(sourceDate)));
+    QuerySnapshot<Map<String, dynamic>> sourceSnapshot;
+    try {
+      sourceSnapshot = await query.get(const GetOptions(source: Source.cache));
+    } catch (_) {
+      sourceSnapshot = await query.get();
+    }
     final sourceItems = sourceSnapshot.docs.map(ScheduleItemModel.fromFirestore).toList();
 
     final batch = _firestore.batch();
