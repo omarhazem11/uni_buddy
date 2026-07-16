@@ -26,41 +26,41 @@ class DashboardBottomNav extends ConsumerWidget {
           _NavItem(
             icon: Icons.calendar_month_rounded,
             label: 'Planner',
-            onTap: () async {
-              await _recordVisit(ref, context, 'planner');
-              if (context.mounted) {
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PlannerPage()));
-              }
-            },
+            onTap: () => _go(context, ref, 'planner', const PlannerPage()),
           ),
           _NavItem(
             icon: Icons.description_outlined,
             label: 'Notes',
-            onTap: () async {
-              await _recordVisit(ref, context, 'notes');
-              if (context.mounted) {
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotesPage()));
-              }
-            },
+            onTap: () => _go(context, ref, 'notes', const NotesPage()),
           ),
           _NavItem(
             icon: Icons.bar_chart_rounded,
             label: 'Analytics',
-            onTap: () async {
-              await _recordVisit(ref, context, 'analytics');
-              if (context.mounted) {
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AnalyticsPage()));
-              }
-            },
+            onTap: () => _go(context, ref, 'analytics', const AnalyticsPage()),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _recordVisit(WidgetRef ref, BuildContext context, String tabName) async {
+  // Navigate immediately — never block on network.
+  // Record the visit and check for badge unlocks in the background.
+  void _go(BuildContext context, WidgetRef ref, String tabName, Widget page) {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+    _recordVisitInBackground(ref, messenger, tabName);
+  }
+
+  Future<void> _recordVisitInBackground(
+    WidgetRef ref,
+    ScaffoldMessengerState? messenger,
+    String tabName,
+  ) async {
     await ref.read(achievementsActionsProvider.notifier).recordTabVisit(tabName);
-    if (context.mounted) await recalculateAndCelebrate(context, ref);
+    final newBadges = await ref.read(achievementsActionsProvider.notifier).recalculateBadges();
+    for (final badge in newBadges) {
+      messenger?.showSnackBar(badgeUnlockSnackBar(badge));
+    }
   }
 }
 

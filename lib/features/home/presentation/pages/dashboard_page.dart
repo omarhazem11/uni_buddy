@@ -32,11 +32,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     // Once per dashboard mount is a reasonable proxy for "once per session
     // start" — the datasource's same-day check keeps repeat mounts a no-op
     // for streak purposes regardless.
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.maybeOf(context);
       final notifier = ref.read(achievementsActionsProvider.notifier);
-      await notifier.recordAppOpen();
-      await notifier.recordTabVisit('home');
-      if (mounted) await recalculateAndCelebrate(context, ref);
+      () async {
+        await notifier.recordAppOpen();
+        await notifier.recordTabVisit('home');
+        final newBadges = await notifier.recalculateBadges();
+        for (final badge in newBadges) {
+          messenger?.showSnackBar(badgeUnlockSnackBar(badge));
+        }
+      }();
     });
   }
 
