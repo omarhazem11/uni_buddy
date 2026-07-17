@@ -33,7 +33,9 @@ class NotificationService {
 
     tz_data.initializeTimeZones();
 
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    // Use the foreground drawable, not ic_launcher — adaptive icons can't be
+    // used as notification icons; Android falls back to a blue circle for them.
+    const androidInit = AndroidInitializationSettings('@drawable/ic_launcher_foreground');
     const iosInit = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -113,6 +115,8 @@ class NotificationService {
         channelDescription: 'Reminders for your upcoming tasks',
         importance: Importance.high,
         priority: Priority.high,
+        icon: '@drawable/ic_launcher_foreground',
+        color: Color(0xFF7B61FF),
       ),
       iOS: DarwinNotificationDetails(),
     );
