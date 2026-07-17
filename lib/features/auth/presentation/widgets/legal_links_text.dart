@@ -1,12 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
-
-// TODO: swap for the confirmed GitHub Pages URLs once live.
-const _termsUrl = 'https://omarhazem11.github.io/uni_verse/terms-of-service.html';
-const _privacyUrl = 'https://omarhazem11.github.io/uni_verse/privacy-policy.html';
+import '../../../settings/presentation/pages/legal_page.dart';
 
 // Same light-violet accent the header uses for "Uni" — legible on the dark
 // AppColors.ink background where AppColors.violet itself reads too dark.
@@ -24,8 +20,10 @@ class LegalLinksText extends StatefulWidget {
 }
 
 class _LegalLinksTextState extends State<LegalLinksText> {
-  late final _termsRecognizer = TapGestureRecognizer()..onTap = () => _open(_termsUrl);
-  late final _privacyRecognizer = TapGestureRecognizer()..onTap = () => _open(_privacyUrl);
+  late final _termsRecognizer = TapGestureRecognizer()
+    ..onTap = () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TermsPage()));
+  late final _privacyRecognizer = TapGestureRecognizer()
+    ..onTap = () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PrivacyPage()));
 
   @override
   void dispose() {
@@ -58,7 +56,4 @@ class _LegalLinksTextState extends State<LegalLinksText> {
     );
   }
 
-  Future<void> _open(String url) async {
-    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-  }
 }

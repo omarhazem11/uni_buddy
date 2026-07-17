@@ -12,9 +12,8 @@ import '../providers/settings_provider.dart';
 import '../utils/switch_user_type_flow.dart';
 import '../widgets/settings_row.dart';
 import '../widgets/settings_section.dart';
+import 'legal_page.dart';
 
-const _termsUrl = 'https://omarhazem11.github.io/uni_verse/terms-of-service.html';
-const _privacyUrl = 'https://omarhazem11.github.io/uni_verse/privacy-policy.html';
 const _supportEmail = 'support@uni-verse.app';
 
 class AccountSettingsPage extends ConsumerStatefulWidget {
@@ -110,8 +109,16 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
               trailing: Text(version, style: GoogleFonts.inter(fontSize: 13, color: AppColors.muted)),
               onTap: null,
             ),
-            SettingsRow(icon: Icons.description_outlined, title: 'Terms of Service', onTap: () => _launch(_termsUrl)),
-            SettingsRow(icon: Icons.privacy_tip_outlined, title: 'Privacy Policy', onTap: () => _launch(_privacyUrl)),
+            SettingsRow(
+              icon: Icons.description_outlined,
+              title: 'Terms of Service',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TermsPage())),
+            ),
+            SettingsRow(
+              icon: Icons.privacy_tip_outlined,
+              title: 'Privacy Policy',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PrivacyPage())),
+            ),
           ]),
         ],
       ),
