@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../achievements/presentation/providers/achievements_provider.dart';
-import '../../../achievements/presentation/utils/celebrate_badges.dart';
-import '../../../analytics/presentation/pages/analytics_page.dart';
-import '../../../notes/presentation/pages/notes_page.dart';
-import '../../../planner/presentation/pages/planner_page.dart';
 
-class DashboardBottomNav extends ConsumerWidget {
-  const DashboardBottomNav({super.key});
+class DashboardBottomNav extends StatelessWidget {
+  final int currentIndex;
+  final void Function(int index) onTap;
+
+  const DashboardBottomNav({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  static const _items = [
+    (icon: Icons.home_rounded, label: 'Home'),
+    (icon: Icons.calendar_month_rounded, label: 'Planner'),
+    (icon: Icons.description_outlined, label: 'Notes'),
+    (icon: Icons.bar_chart_rounded, label: 'Analytics'),
+  ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 12, 8, 22),
       decoration: const BoxDecoration(
@@ -22,45 +30,16 @@ class DashboardBottomNav extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          const _NavItem(icon: Icons.home_rounded, label: 'Home', active: true),
-          _NavItem(
-            icon: Icons.calendar_month_rounded,
-            label: 'Planner',
-            onTap: () => _go(context, ref, 'planner', const PlannerPage()),
-          ),
-          _NavItem(
-            icon: Icons.description_outlined,
-            label: 'Notes',
-            onTap: () => _go(context, ref, 'notes', const NotesPage()),
-          ),
-          _NavItem(
-            icon: Icons.bar_chart_rounded,
-            label: 'Analytics',
-            onTap: () => _go(context, ref, 'analytics', const AnalyticsPage()),
-          ),
+          for (var i = 0; i < _items.length; i++)
+            _NavItem(
+              icon: _items[i].icon,
+              label: _items[i].label,
+              active: currentIndex == i,
+              onTap: () => onTap(i),
+            ),
         ],
       ),
     );
-  }
-
-  // Navigate immediately — never block on network.
-  // Record the visit and check for badge unlocks in the background.
-  void _go(BuildContext context, WidgetRef ref, String tabName, Widget page) {
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
-    _recordVisitInBackground(ref, messenger, tabName);
-  }
-
-  Future<void> _recordVisitInBackground(
-    WidgetRef ref,
-    ScaffoldMessengerState? messenger,
-    String tabName,
-  ) async {
-    await ref.read(achievementsActionsProvider.notifier).recordTabVisit(tabName);
-    final newBadges = await ref.read(achievementsActionsProvider.notifier).recalculateBadges();
-    for (final badge in newBadges) {
-      messenger?.showSnackBar(badgeUnlockSnackBar(badge));
-    }
   }
 }
 
@@ -68,9 +47,14 @@ class _NavItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool active;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
-  const _NavItem({required this.icon, required this.label, this.active = false, this.onTap});
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

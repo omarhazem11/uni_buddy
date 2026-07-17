@@ -10,6 +10,7 @@ import 'core/widgets/uni_verse_logo.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/home/presentation/pages/dashboard_page.dart';
+import 'features/home/presentation/pages/main_shell.dart';
 import 'features/notifications/presentation/providers/notification_provider.dart';
 import 'features/onboarding/domain/entities/user_type.dart';
 import 'features/onboarding/presentation/pages/coming_soon_page.dart';
@@ -139,7 +140,7 @@ class _PostLoginRouterState extends ConsumerState<_PostLoginRouter> {
       error: (_, __) => const OnboardingPage(),
       data: (userType) => switch (userType) {
         null => const OnboardingPage(),
-        UserType.student => const DashboardPage(),
+        UserType.student => const MainShell(),
         UserType.searching => const ComingSoonPage(),
       },
     );

@@ -11,7 +11,6 @@ import '../../../tasks/presentation/providers/task_provider.dart';
 import '../../../tasks/presentation/utils/task_stats.dart';
 import '../providers/dashboard_onboarding_provider.dart';
 import '../providers/greeting_provider.dart';
-import '../widgets/dashboard_bottom_nav.dart';
 import '../widgets/dashboard_getting_started_card.dart';
 import '../widgets/dashboard_hero_card.dart';
 import '../widgets/dashboard_next_task_card.dart';
@@ -139,10 +138,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: const SafeArea(
-        top: false,
-        child: DashboardBottomNav(),
       ),
     );
   }
