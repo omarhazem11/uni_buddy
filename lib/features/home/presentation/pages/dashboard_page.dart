@@ -61,10 +61,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
 
     final tasks = ref.watch(tasksStreamProvider).value ?? [];
+    final overdueCount = tasks.overdueCount;
     final dueThisWeek = tasks.dueWithin(const Duration(days: 7));
-    final heroSubtitle = dueThisWeek > 0
-        ? 'You have $dueThisWeek things due this week'
-        : "You're all caught up! 🎉";
+    final heroSubtitle = overdueCount > 0
+        ? '$overdueCount task${overdueCount == 1 ? '' : 's'} overdue — catch up!'
+        : dueThisWeek > 0
+            ? 'You have $dueThisWeek things due this week'
+            : "You're all caught up! 🎉";
 
     final hasScheduleItems = ref.watch(hasAnyScheduleItemsProvider).value ?? false;
     // Excludes "Getting Started" — it unlocks the instant any tab is
@@ -113,6 +116,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     DashboardHeroCard(
                       greeting: '$greeting, $firstName 👋',
                       subtitle: heroSubtitle,
+                      overdueCount: overdueCount,
                       onViewTasks: () => Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const TasksPage()),
                       ),

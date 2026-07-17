@@ -6,12 +6,14 @@ class DashboardHeroCard extends StatelessWidget {
   final String greeting;
   final String subtitle;
   final VoidCallback onViewTasks;
+  final int overdueCount;
 
   const DashboardHeroCard({
     super.key,
     required this.greeting,
     required this.subtitle,
     required this.onViewTasks,
+    this.overdueCount = 0,
   });
 
   @override
@@ -51,8 +53,15 @@ class DashboardHeroCard extends StatelessWidget {
                       height: 1.2,
                     ),
                   ),
+                  if (overdueCount > 0) ...[
+                    const SizedBox(height: 10),
+                    _OverdueBanner(count: overdueCount),
+                  ],
                   const SizedBox(height: 16),
-                  _ViewTasksPill(onTap: onViewTasks),
+                  _ViewTasksPill(
+                    onTap: onViewTasks,
+                    label: overdueCount > 0 ? 'View overdue →' : 'View tasks →',
+                  ),
                 ],
               ),
             ),
@@ -65,8 +74,9 @@ class DashboardHeroCard extends StatelessWidget {
 
 class _ViewTasksPill extends StatelessWidget {
   final VoidCallback onTap;
+  final String label;
 
-  const _ViewTasksPill({required this.onTap});
+  const _ViewTasksPill({required this.onTap, this.label = 'View tasks →'});
 
   @override
   Widget build(BuildContext context) {
@@ -80,13 +90,45 @@ class _ViewTasksPill extends StatelessWidget {
           borderRadius: BorderRadius.circular(100),
         ),
         child: Text(
-          'View tasks →',
+          label,
           style: GoogleFonts.nunito(
             fontSize: 13,
             fontWeight: FontWeight.w800,
             color: Colors.white,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _OverdueBanner extends StatelessWidget {
+  final int count;
+  const _OverdueBanner({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.coral.withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: AppColors.coral.withValues(alpha: 0.5), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.warning_amber_rounded, size: 13, color: Colors.white),
+          const SizedBox(width: 5),
+          Text(
+            '$count task${count == 1 ? '' : 's'} past due',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -5,6 +5,11 @@ import '../../domain/entities/task_entity.dart';
 extension TaskListStats on List<TaskEntity> {
   int get activeCount => where((t) => !t.isCompleted).length;
 
+  int get overdueCount {
+    final now = DateTime.now();
+    return where((t) => !t.isCompleted && t.dueDate != null && t.dueDate!.isBefore(now)).length;
+  }
+
   /// Active tasks due before [window] from now — includes anything already
   /// overdue, since an overdue task is at least as urgent as one due soon.
   int dueWithin(Duration window) {

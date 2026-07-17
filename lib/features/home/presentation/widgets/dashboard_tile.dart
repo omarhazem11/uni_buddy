@@ -11,6 +11,7 @@ class DashboardTile extends StatelessWidget {
   final Color iconBackground;
   final Color accent;
   final VoidCallback onTap;
+  final int badgeCount;
 
   const DashboardTile({
     super.key,
@@ -21,6 +22,7 @@ class DashboardTile extends StatelessWidget {
     required this.iconBackground,
     required this.accent,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   @override
@@ -91,14 +93,41 @@ class DashboardTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: tier.iconContainerSize,
-                      height: tier.iconContainerSize,
-                      decoration: BoxDecoration(
-                        color: iconBackground,
-                        borderRadius: BorderRadius.circular(tier.iconRadius),
-                      ),
-                      child: Icon(icon, color: accent, size: tier.iconGlyphSize),
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: tier.iconContainerSize,
+                          height: tier.iconContainerSize,
+                          decoration: BoxDecoration(
+                            color: iconBackground,
+                            borderRadius: BorderRadius.circular(tier.iconRadius),
+                          ),
+                          child: Icon(icon, color: accent, size: tier.iconGlyphSize),
+                        ),
+                        if (badgeCount > 0)
+                          Positioned(
+                            top: -4,
+                            right: -4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.coral,
+                                borderRadius: BorderRadius.circular(100),
+                                border: Border.all(color: Colors.white, width: 1.5),
+                              ),
+                              child: Text(
+                                '$badgeCount',
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  height: 1,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     SizedBox(height: tier.iconTitleGap),
                     Text(

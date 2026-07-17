@@ -19,7 +19,8 @@ class DashboardTileGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(tasksStreamProvider).value ?? [];
-    final tasksSubtitle = _tasksSubtitle(tasks);
+    final overdueCount = tasks.overdueCount;
+    final tasksSubtitle = _tasksSubtitle(tasks, overdueCount);
     final todayItemCount = ref.watch(dayItemsProvider(dateOnly(DateTime.now()))).value?.length ?? 0;
     final plannerSubtitle = todayItemCount > 0 ? '$todayItemCount scheduled today' : 'Plan your week 📅';
     final unlockedBadgeCount =
@@ -43,6 +44,7 @@ class DashboardTileGrid extends ConsumerWidget {
                   background: AppColors.tileCoralBg,
                   iconBackground: AppColors.tileCoralIcon,
                   accent: AppColors.tileCoralText,
+                  badgeCount: overdueCount,
                   onTap: () => _openTasks(context),
                 ),
               ),
@@ -96,8 +98,9 @@ class DashboardTileGrid extends ConsumerWidget {
     );
   }
 
-  String _tasksSubtitle(List<TaskEntity> tasks) {
+  String _tasksSubtitle(List<TaskEntity> tasks, int overdueCount) {
     if (tasks.isEmpty) return 'Add your first task! ✏️';
+    if (overdueCount > 0) return '$overdueCount overdue!';
 
     final active = tasks.activeCount;
     if (active == 0) return 'All done for now! ✅';
