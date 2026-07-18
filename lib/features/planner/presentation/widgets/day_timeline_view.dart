@@ -38,32 +38,63 @@ class DayTimelineView extends ConsumerWidget {
     final start = settings.dayStartMinutes;
     final end = settings.dayEndMinutes;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: SizedBox(
-        height: totalTimelineHeight(start, end),
-        child: Stack(
-          children: [
-            TimelineHourMarkers(dayStartMinutes: start, dayEndMinutes: end),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const contentLeft = timelineLabelWidth + 8.0;
+        final contentWidth = constraints.maxWidth - contentLeft;
+
+        // Compute side-by-side columns for overlapping schedule items.
+        final scheduleLayouts = computeBlockLayouts(
+          items: [
             for (final item in items)
-              Positioned(
-                top: timelineTop(item.startTime, start),
-                left: timelineLabelWidth + 8,
-                right: 0,
-                height: timelineHeight(item.startTime, item.endTime),
-                child: ScheduleItemBlock(item: item),
-              ),
+              (id: item.id, start: item.startTime, end: item.endTime),
+          ],
+          contentLeft: contentLeft,
+          contentWidth: contentWidth,
+        );
+
+        // Tasks are point-in-time; treat as 30-minute blocks for collision.
+        final taskLayouts = computeBlockLayouts(
+          items: [
             for (final task in tasksToday)
-              Positioned(
-                top: timelineTop(task.dueDate!, start),
-                left: timelineLabelWidth + 8,
-                right: 0,
-                height: taskBlockHeight,
-                child: TaskTimelineBlock(task: task),
+              (
+                id: task.id,
+                start: task.dueDate!,
+                end: task.dueDate!.add(const Duration(minutes: 30)),
               ),
           ],
-        ),
-      ),
+          contentLeft: contentLeft,
+          contentWidth: contentWidth,
+        );
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: SizedBox(
+            height: totalTimelineHeight(start, end),
+            child: Stack(
+              children: [
+                TimelineHourMarkers(dayStartMinutes: start, dayEndMinutes: end),
+                for (final item in items)
+                  Positioned(
+                    top: timelineTop(item.startTime, start),
+                    left: scheduleLayouts[item.id]!.left,
+                    right: scheduleLayouts[item.id]!.right,
+                    height: timelineHeight(item.startTime, item.endTime),
+                    child: ScheduleItemBlock(item: item),
+                  ),
+                for (final task in tasksToday)
+                  Positioned(
+                    top: timelineTop(task.dueDate!, start),
+                    left: taskLayouts[task.id]!.left,
+                    right: taskLayouts[task.id]!.right,
+                    height: taskBlockHeight,
+                    child: TaskTimelineBlock(task: task),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

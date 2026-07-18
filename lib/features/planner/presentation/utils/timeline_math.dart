@@ -25,3 +25,90 @@ double totalTimelineHeight(int dayStartMinutes, int dayEndMinutes) {
 /// Tasks are a point in time, not a range, so they get a fixed nominal
 /// block height on the timeline rather than one derived from a duration.
 const double taskBlockHeight = 30 * pixelsPerMinute;
+
+// ---------------------------------------------------------------------------
+// Overlap layout
+// ---------------------------------------------------------------------------
+
+/// Left/right offsets (in pixels from the Stack edges) for a single item
+/// within the content area. Both values are distances from the respective
+/// edges, matching how Positioned.left / Positioned.right work.
+typedef BlockLayout = ({double left, double right});
+
+/// Assigns side-by-side columns to items that overlap in time so no event
+/// is hidden behind another (Google Calendar style).
+///
+/// [items] is a list of (id, start, end) records — supply tasks and schedule
+/// items separately and call this twice, or combine them.
+/// [contentLeft] is the x-offset where the event area begins (label width + gap).
+/// [contentWidth] is the available width for events.
+Map<String, BlockLayout> computeBlockLayouts({
+  required List<({String id, DateTime start, DateTime end})> items,
+  required double contentLeft,
+  required double contentWidth,
+}) {
+  if (items.isEmpty) return {};
+
+  final sorted = [...items]..sort((a, b) => a.start.compareTo(b.start));
+
+  // --- Step 1: group items that directly or transitively overlap -----------
+  final groups = <List<({String id, DateTime start, DateTime end})>>[];
+
+  for (final item in sorted) {
+    // Find every existing group this item overlaps with.
+    final overlapping = <int>[];
+    for (var g = 0; g < groups.length; g++) {
+      if (groups[g].any((other) => _overlaps(item.start, item.end, other.start, other.end))) {
+        overlapping.add(g);
+      }
+    }
+
+    if (overlapping.isEmpty) {
+      groups.add([item]);
+    } else {
+      // Merge all overlapping groups into one.
+      final merged = [item];
+      for (final idx in overlapping.reversed) {
+        merged.addAll(groups.removeAt(idx));
+      }
+      groups.add(merged);
+    }
+  }
+
+  // --- Step 2: assign columns within each group ----------------------------
+  final result = <String, BlockLayout>{};
+
+  for (final group in groups) {
+    final gSorted = [...group]..sort((a, b) => a.start.compareTo(b.start));
+    final colEnds = <DateTime>[];      // last end time for each column
+    final itemCol = <String, int>{};
+
+    for (final item in gSorted) {
+      // Find first column whose last item has already ended.
+      var col = colEnds.indexWhere((end) => !end.isAfter(item.start));
+      if (col == -1) {
+        col = colEnds.length;
+        colEnds.add(item.end);
+      } else {
+        colEnds[col] = item.end;
+      }
+      itemCol[item.id] = col;
+    }
+
+    final totalCols = colEnds.length;
+    final slotW = contentWidth / totalCols;
+
+    for (final item in group) {
+      final col = itemCol[item.id]!;
+      result[item.id] = (
+        left: contentLeft + col * slotW,
+        right: (totalCols - col - 1) * slotW,
+      );
+    }
+  }
+
+  return result;
+}
+
+bool _overlaps(DateTime aStart, DateTime aEnd, DateTime bStart, DateTime bEnd) =>
+    aStart.isBefore(bEnd) && bStart.isBefore(aEnd);
