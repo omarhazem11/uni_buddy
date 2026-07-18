@@ -16,48 +16,46 @@ class DateStrip extends ConsumerWidget {
 
     return SizedBox(
       height: 68,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: days.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 6),
-        itemBuilder: (context, index) {
-          final day = days[index];
-          final isSelected = day == selected;
-          return GestureDetector(
-            onTap: () => ref.read(selectedDateProvider.notifier).state = day,
-            child: SizedBox(
-              width: 44,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _weekdayLetters[day.weekday - 1],
-                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.muted),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isSelected ? AppColors.violet : Colors.transparent,
-                    ),
-                    child: Text(
-                      '${day.day}',
-                      style: GoogleFonts.nunito(
-                        fontSize: 15,
-                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                        color: isSelected ? Colors.white : AppColors.ink,
+      child: Row(
+        children: [
+          for (final day in days)
+            Expanded(
+              child: GestureDetector(
+                onTap: () => ref.read(selectedDateProvider.notifier).state = day,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _weekdayLetters[day.weekday - 1],
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.muted,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 6),
+                    Container(
+                      width: 36,
+                      height: 36,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: day == selected ? AppColors.violet : Colors.transparent,
+                      ),
+                      child: Text(
+                        '${day.day}',
+                        style: GoogleFonts.nunito(
+                          fontSize: 15,
+                          fontWeight: day == selected ? FontWeight.w800 : FontWeight.w600,
+                          color: day == selected ? Colors.white : AppColors.ink,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          );
-        },
+        ],
       ),
     );
   }
